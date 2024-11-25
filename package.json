@@ -4,13 +4,13 @@
   "main": "dist/jonads.js",
   "types": "dist/jonads.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -r dist/* && tsc",
     "test": "jest"
   },
-  "keywords": [],
+  "keywords": ["monads", "functional programming", "typescript", "fp"],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
   "dependencies": {
     "typescript": "^5.7.2"
   },
