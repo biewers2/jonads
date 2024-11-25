@@ -137,6 +137,10 @@ export class Ok<V, E extends Error> extends Left<V, E> implements Result<V, E> {
     async andThenAsync<T>(mapper: (value: V) => Promise<Result<T, E>>): Promise<Result<T, E>> {
         return mapper(this.value);
     }
+
+    toString(): string {
+        return `Ok(${this.value})`;
+    }
 }
 
 /**
@@ -190,5 +194,9 @@ export class Err<V, E extends Error> extends Right<V, E> implements Result<V, E>
 
     async andThenAsync<T>(mapper: (value: V) => Promise<Result<T, E>>): Promise<Result<T, E>> {
         return new Err(this.value);
+    }
+
+    toString(): string {
+        return `Err(${this.value})`;
     }
 }

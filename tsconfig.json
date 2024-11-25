@@ -5,7 +5,7 @@
         "outDir": "dist/",
         "declaration": true,
         "noImplicitAny": true,
-        "removeComments": true
+        "removeComments": false // To keep doc comments
     },
     "include": [
         "src/**/*"

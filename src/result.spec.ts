@@ -159,6 +159,17 @@ describe("Result", () => {
             expect(mapped.getRightOrThrow()).toBe(error);
         });
     });
+
+    describe("toString()", () => {
+        it("converts to a string", () => {
+            const l = ok("yes");
+            expect(l.toString()).toBe("Ok(yes)");
+
+            const r = err(new Error());
+            expect(r.toString()).toBe("Err(Error)");
+        });
+
+    });
 });
 
 function ok(value: string): Result<string, Error> {

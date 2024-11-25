@@ -200,6 +200,10 @@ export class Left<L, R> implements Either<L, R> {
     getRightOrThrow(): R {
         throw new GetValueError("right");
     }
+
+    toString(): string {
+        return `Left(${this.value})`;
+    }
 }
 
 /**
@@ -279,5 +283,9 @@ export class Right<L, R> implements Either<L, R> {
 
     getRightOrThrow(): R {
         return this.value;
+    }
+
+    toString(): string {
+        return `Right(${this.value})`;
     }
 }
