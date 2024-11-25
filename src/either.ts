@@ -1,4 +1,5 @@
 import { GetValueError } from "./errors";
+import { isFunction } from "./guards";
 
 /**
  * An Either jonad.
@@ -279,8 +280,4 @@ export class Right<L, R> implements Either<L, R> {
     getRightOrThrow(): R {
         return this.value;
     }
-}
-
-function isFunction<F extends (...args: any[]) => any>(f: unknown): f is F {
-    return typeof f === "function";
 }

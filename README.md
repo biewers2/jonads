@@ -90,8 +90,8 @@ functions aren't supplied.
 There's a concept in Haskell called "do-notation". Effectively, this notation allows Haskell to extract the side-effects
 from function/service calls (for us, `Err` in a `Result`) and focus primarily on the happy-path values.
 
-To recreate this notation, the `jDo` function can be used to run a sequence of services that return "results".
-By calling this function at the top of any function, and passing the actual function logic to it through a callback, `jDo`
+To recreate this notation, the `doing` function can be used to run a sequence of services that return "results".
+By calling this function at the top of any function, and passing the actual function logic to it through a callback, `doing`
 can capture any thrown errors into `Err` values and allow you, the developer, to extract the side-effects away from the function's
 logic via a call to the provided `bind` function.
 
@@ -109,16 +109,16 @@ propagate them to the caller.
 //   getWorkspace(id: number): Result<Workspace, GetWorkspaceError>
 
 // getUserWorkspaceName(userId: number): Result<string, DatabaseError>
-const getUserWorkspaceName = (userId) => jDo(bind => {
+const getUserWorkspaceName = (userId) => doing(bind => {
     const user = bind(getUser(userId));
     const workspace = bind(getWorkspace(user.workspaceId));
     return workspace.name
 });
 ```
 
-Although `jDo` captures any thrown exceptions in a `Result` as `Err`s, there may be simpler cases where you would only
+Although `doing` captures any thrown exceptions in a `Result` as `Err`s, there may be simpler cases where you would only
 want to capture specific (or any) execption from a single function call that may not return a result. You can do this
-using `jTry` and `jTryCatching`.
+using `trying` and `tryCatching`.
 
 ```javascript
 class NonSingleDigitError extends Error {}
@@ -131,16 +131,16 @@ function onlySingleDigit(value) {
     }
 }
 
-console.log(jTry(() => onlySingleDigit(3)));
+console.log(trying(() => onlySingleDigit(3)));
 // => Ok(3)
 
-console.log(jTry(() => onlySingleDigit(10)));
+console.log(trying(() => onlySingleDigit(10)));
 // => Err(NonSingleDigitError)
 
 // ...
 
 class NegativeNumberError extends Error {}
 
-console.log(jTryCatching([NegativeNumberError], () => onlySingleDigit(-10)));
+console.log(tryCatching([NegativeNumberError], () => onlySingleDigit(-10)));
 // throws `NonSingleDigitError`.
 ```

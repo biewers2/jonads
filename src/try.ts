@@ -11,34 +11,73 @@ export type ErrorClass = { new(...args: any[]): Error };
  * @param block The block of code to execute.
  * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
  */
-export function jTry<T, E extends Error>(block: () => T): Result<T, E> {
+export function trying<T, E extends Error>(block: () => T): Result<T, E> {
     try {
         return new Ok(block());
     } catch (e) {
-        return new Err(e as E);
+        return new Err(e);
+    }
+}
+
+/**
+ * Execute an async block of code, catching any errors and returning them as `Err`.
+ * 
+ * @param block The block of code to execute.
+ * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
+ */
+export async function tryingAsync<T, E extends Error>(block: () => Promise<T>): Promise<Result<T, E>> {
+    try {
+        return new Ok(await block());
+    } catch (e) {
+        return new Err(e);
     }
 }
 
 /**
  * Execute a block of code, catching any errors of the specified types and returning them as `Err`.
  * 
- * If no errors are specified, the block will be executed as if it were passed to `jTry`.
+ * If no errors are specified, the block will be executed as if it were passed to `trying`.
  * 
  * @param errors The expected error types to catch from the block.
  * @param block The block of code to execute.
  * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
  */
-export function jTryCatching<T, E extends Error>(errors: ErrorClass[], block: () => T): Result<T, E> {
+export function tryCatching<T, E extends Error>(errors: ErrorClass[], block: () => T): Result<T, E> {
     if (errors.length === 0) {
-        return jTry(block);
+        return trying(block);
     }
 
     try {
         return new Ok(block());
     } catch (e) {
-        if (errors.some(err => e instanceof err)) {
-            return new Err(e as E);
-        }
-        throw e;
+        return handleTryError(e, errors);
     }
+}
+
+/**
+ * Execute an async block of code, catching any errors of the specified types and returning them as `Err`.
+ * 
+ * If no errors are specified, the block will be executed as if it were passed to `tryingAsync`.
+ * 
+ * @param errors The expected error types to catch from the block.
+ * @param block The block of code to execute.
+ * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
+ */
+export async function tryCatchingAsync<T, E extends Error>(errors: ErrorClass[], block: () => Promise<T>): Promise<Result<T, E>> {
+    if (errors.length === 0) {
+        return tryingAsync(block);
+    }
+
+    try {
+        return new Ok(await block());
+    } catch (e) {
+        return handleTryError(e, errors);
+    }
+}
+
+function handleTryError<E extends Error>(e: E, errors: ErrorClass[]): Result<never, E> {
+    if (errors.some(err => e instanceof err)) {
+        return new Err(e);
+    }
+    throw e;
 }

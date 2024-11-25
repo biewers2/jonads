@@ -1,4 +1,4 @@
-import { Either, Left, Right, Result, Ok, Err, jDo, jTry, jTryCatching } from "./index";
+import { Either, Left, Right, Result, Ok, Err, doing, trying, tryCatching } from "./index";
 
 describe("README", () => {
     describe("Either examples", () => {
@@ -46,7 +46,7 @@ describe("README", () => {
         });
     });
 
-    describe("jDo examples", () => {
+    describe("doing examples", () => {
         class DatabaseError extends Error {}
         class GetUserError extends DatabaseError {}
         class GetWorkspaceError extends DatabaseError {}
@@ -70,7 +70,7 @@ describe("README", () => {
             }
         }
 
-        const getUserWorkspaceName = (userId: number): Result<string, DatabaseError> => jDo(bind => {
+        const getUserWorkspaceName = (userId: number): Result<string, DatabaseError> => doing(bind => {
             const user = bind(getUser(userId));
             const workspace = bind(getWorkspace(user.workspaceId));
             return workspace.name
@@ -89,7 +89,7 @@ describe("README", () => {
         });
     });
 
-    describe("jTry examples", () => {
+    describe("trying examples", () => {
         class NonSingleDigitError extends Error {}
         class NegativeNumberError extends Error {}
 
@@ -102,20 +102,20 @@ describe("README", () => {
         }
 
         it("passes first part", () => {
-            const result = jTry(() => onlySingleDigit(3));
+            const result = trying(() => onlySingleDigit(3));
             expect(result.isOk()).toBe(true);
             expect(result.getLeftOrThrow()).toBe(3);
         });
 
         it("passes second part", () => {
-            const result = jTry(() => onlySingleDigit(10));
+            const result = trying(() => onlySingleDigit(10));
             expect(result.isErr()).toBe(true);
             expect(result.getRightOrThrow()).toBeInstanceOf(NonSingleDigitError);
         });
 
         it("passes third part", () => {
             expect(() =>
-                jTryCatching([NegativeNumberError], () => onlySingleDigit(-10))
+                tryCatching([NegativeNumberError], () => onlySingleDigit(-10))
             ).toThrow(NonSingleDigitError);
         });
     });
