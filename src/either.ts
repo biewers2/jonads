@@ -1,28 +1,96 @@
 import { GetValueError } from "./errors";
 
+/**
+ * An Either jonad.
+ * 
+ * Represents a value that can be one of two types, "Left" or "Right". Associates a set of utility functions to work
+ * with the jonad.
+ */
 export interface Either<L, R> {
+    /**
+     * Checks if the value is a Left.
+     * 
+     * @returns true if the value is a Left, false otherwise.
+     */
     isLeft: () => boolean;
 
+    /**
+     * Checks if the value is a Right.
+     * 
+     * @returns true if the value is a Right, false otherwise.
+     */
     isRight: () => boolean;
 
+    /**
+     * Returns the value if it is a Left, otherwise returns a default value.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is a Right.
+     * @returns The value if it is a Left, otherwise the default value.
+     */
     leftOr: (fallback: L | ((right: R) => L)) => L;
 
+    /**
+     * Returns the value if it is a Right, otherwise returns a default value.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is a Left.
+     * @returns The value if it is a Right, otherwise the default value.
+     */
     rightOr: (fallback: R | ((left: L) => R)) => R;
 
+    /**
+     * Maps the value if it is a Left, otherwise returns the value as-is.
+     * 
+     * @param mapper The function to apply to the value if it is a Left.
+     * @returns A new Either with the mapped value if it is a Left, otherwise the value as-is.
+     */
     mapLeft: <V>(mapper: (value: L) => V) => Either<V, R>;
 
+    /**
+     * Maps the value if it is a Right, otherwise returns the value as-is.
+     * 
+     * @param mapper The function to apply to the value if it is a Right.
+     * @returns A new Either with the mapped value if it is a Right, otherwise the value as-is.
+     */
     mapRight: <V>(mapper: (value: R) => V) => Either<L, V>;
 
+    /**
+     * Matches the jonad by calling the appropriate callback based on the value type.
+     * 
+     * @param on_left If the value is a Left, this callback is called with the value.
+     * @param on_right If the value is a Right, this callback is called with the value.
+     * @returns The result of the callback that was called.
+     */
     match: <V>(on_left: (value: L) => V, on_right: (value: R) => V) => V;
 
+    /**
+     * Returns the value if it is a Left, otherwise throws an error.
+     * 
+     * @returns The value if it is a Left.
+     * @throws GetValueError if the value is a Right.
+     * @note This function is unsafe and should only be used for testing.
+     */
     getLeftOrThrow: () => L;
 
+    /**
+     * Returns the value if it is a Right, otherwise throws an error.
+     * @returns The value if it is a Right.
+     * @throws GetValueError if the value is a Left.
+     * @note This function is unsafe and should only be used for testing.
+     */
     getRightOrThrow: () => R;
 }
 
+/**
+ * An Either jonad with a Left value.
+ */
 export class Left<L, R> implements Either<L, R> {
     protected value: L;
 
+    /**
+     * Creates a new Left instance with the given value.
+     * 
+     * @param value The value to store in the Left instance.
+     */
     constructor(value: L) {
         this.value = value;
     }
@@ -68,9 +136,17 @@ export class Left<L, R> implements Either<L, R> {
     }
 }
 
+/**
+ * An Either jonad with a Right value.
+ */
 export class Right<L, R> implements Either<L, R> {
     protected value: R;
 
+    /**
+     * Creates a new Right instance with the given value.
+     * 
+     * @param value The value to store in the Right instance.
+     */
     constructor(value: R) {
         this.value = value;
     }
