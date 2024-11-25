@@ -42,6 +42,23 @@ describe("Either", () => {
         });
     });
 
+    describe("leftOrAsync()", () => {
+        it("returns the value for Left", async () => {
+            const l = left(1);
+            expect(await l.leftOrAsync(2)).toBe(1);
+        });
+
+        it("returns the fallback value for Right", async () => {
+            const r = right("a");
+            expect(await r.leftOrAsync(2)).toBe(2);
+        });
+
+        it("returns the result of the fallback function for Right", async () => {
+            const r = right("5");
+            expect(await r.leftOrAsync(async n => parseInt(n))).toBe(5);
+        });
+    });
+
     describe("rightOr()", () => {
         it("returns the fallback value for Left", () => {
             const l = left(1);
@@ -59,6 +76,23 @@ describe("Either", () => {
         });
     });
 
+    describe("rightOrAsync()", () => {
+        it("returns the fallback value for Left", async () => {
+            const l = left(1);
+            expect(await l.rightOrAsync("a")).toBe("a");
+        });
+
+        it("returns the result of the fallback function for Left", async () => {
+            const l = left(1);
+            expect(await l.rightOrAsync(async n => n + "")).toBe("1");
+        });
+
+        it("returns the value for Right", async () => {
+            const r = right("a");
+            expect(await r.rightOrAsync("b")).toBe("a");
+        });
+    });
+
     describe("mapLeft()", () => {
         it("returns a new Left instance with the mapped value for Left", () => {
             const l = left(1);
@@ -70,6 +104,22 @@ describe("Either", () => {
         it("returns a new Right instance with the same value for Right", () => {
             const r = right("a");
             const mapped = r.mapLeft((n) => n * 2);
+            expect(mapped.isRight()).toBe(true);
+            expect(mapped.getRightOrThrow()).toBe("a");
+        });
+    });
+
+    describe("mapLeftAsync()", () => {
+        it("returns a new Left instance with the mapped value for Left", async () => {
+            const l = left(1);
+            const mapped = await l.mapLeftAsync((n) => Promise.resolve(n * 2));
+            expect(mapped.isLeft()).toBe(true);
+            expect(mapped.getLeftOrThrow()).toBe(2);
+        });
+
+        it("returns a new Right instance with the same value for Right", async () => {
+            const r = right("a");
+            const mapped = await r.mapLeftAsync((n) => Promise.resolve(n * 2));
             expect(mapped.isRight()).toBe(true);
             expect(mapped.getRightOrThrow()).toBe("a");
         });
@@ -91,6 +141,22 @@ describe("Either", () => {
         });
     });
 
+    describe("mapRightAsync()", () => {
+        it("returns a new Left instance with the same value for Left", async () => {
+            const l = left(1);
+            const mapped = await l.mapRightAsync((n) => Promise.resolve(n + " * " + n));
+            expect(mapped.isLeft()).toBe(true);
+            expect(mapped.getLeftOrThrow()).toBe(1);
+        });
+
+        it("returns a new Right instance with the mapped value for Right", async () => {
+            const r = right("a");
+            const mapped = await r.mapRightAsync((s) => Promise.resolve(s + " * " + s));
+            expect(mapped.isRight()).toBe(true);
+            expect(mapped.getRightOrThrow()).toBe("a * a");
+        });
+    });
+
     describe("match()", () => {
         it("calls the on_left function for Left", () => {
             const l = left(1);
@@ -106,6 +172,26 @@ describe("Either", () => {
             const result = r.match(
                 (n) => n * 2,
                 (s) => parseInt(s) * 2
+            );
+            expect(result).toBe(10);
+        });
+    });
+
+    describe("matchAsync()", () => {
+        it("calls the on_left function for Left", async () => {
+            const l = left(1);
+            const result = await l.matchAsync(
+                async (n) => n * 2,
+                async (s) => parseInt(s)
+            );
+            expect(result).toBe(2);
+        });
+
+        it("calls the on_right function for Right", async () => {
+            const r = right("5");
+            const result = await r.matchAsync(
+                async (n) => n * 2,
+                async (s) => parseInt(s) * 2
             );
             expect(result).toBe(10);
         });

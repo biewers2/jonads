@@ -43,6 +43,23 @@ describe("Result", () => {
         });
     });
 
+    describe("valueOrAsync()", () => {
+        it("returns the value for Ok", async () => {
+            const result = ok("a");
+            expect(await result.valueOrAsync("b")).toBe("a");
+        });
+
+        it("returns the fallback value for Err", async () => {
+            const result = err(new Error());
+            expect(await result.valueOrAsync("b")).toBe("b");
+        });
+
+        it("returns the result of the fallback function for Err", async () => {
+            const result = err(new Error("5"));
+            expect(await result.valueOrAsync(async e => e.message)).toBe("5");
+        });
+    });
+
     describe("map()", () => {
         it("maps the value for Ok", () => {
             const result = ok("a");
@@ -54,6 +71,21 @@ describe("Result", () => {
             const error = new Error();
             const result = err(error);
             const mapped = result.map(v => v.toUpperCase());
+            expect(mapped.getRightOrThrow()).toBe(error);
+        });
+    });
+
+    describe("mapAsync()", () => {
+        it("maps the value for Ok", async () => {
+            const result = ok("a");
+            const mapped = await result.mapAsync(async v => v.toUpperCase());
+            expect(mapped.valueOr("b")).toBe("A");
+        });
+
+        it("does not map the value for Err", async () => {
+            const error = new Error();
+            const result = err(error);
+            const mapped = await result.mapAsync(async v => v.toUpperCase());
             expect(mapped.getRightOrThrow()).toBe(error);
         });
     });
@@ -78,17 +110,52 @@ describe("Result", () => {
         });
     });
 
-    describe("then()", () => {
+    describe("mapErrAsync()", () => {
+        it("does not map the error for Ok", async () => {
+            const result = ok("a");
+            const mapped = await result.mapErrAsync(async e => new JonadsError(e.message));
+            expect(mapped.getLeftOrThrow()).toBe("a");
+        });
+
+        it("maps the error for Err", async () => {
+            class NewError extends Error {}
+
+            const error = new Error();
+            const result = err(error);
+            const mapped = await result.mapErrAsync(async e => new NewError(e.message));
+
+            const newError = mapped.getRightOrThrow();
+            expect(newError).toBeInstanceOf(NewError);
+            expect(newError.message).toBe(error.message);
+        });
+    });
+
+    describe("andThen()", () => {
         it("returns the mapped value for Ok", () => {
             const result = ok("a");
-            const mapped = result.then(v => ok(v.toUpperCase()));
+            const mapped = result.andThen(v => ok(v.toUpperCase()));
             expect(mapped.valueOr("b")).toBe("A");
         });
 
         it("returns the error for Err", () => {
             const error = new Error();
             const result = err(error);
-            const mapped = result.then(v => ok(v.toUpperCase()));
+            const mapped = result.andThen(v => ok(v.toUpperCase()));
+            expect(mapped.getRightOrThrow()).toBe(error);
+        });
+    });
+
+    describe("andThenAsync()", () => {
+        it("returns the mapped value for Ok", async () => {
+            const result = ok("a");
+            const mapped = await result.andThenAsync(async v => ok(v.toUpperCase()));
+            expect(mapped.valueOr("b")).toBe("A");
+        });
+
+        it("returns the error for Err", async () => {
+            const error = new Error();
+            const result = err(error);
+            const mapped = await result.andThenAsync(async v => ok(v.toUpperCase()));
             expect(mapped.getRightOrThrow()).toBe(error);
         });
     });
