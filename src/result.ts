@@ -44,6 +44,14 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * @returns A new Result with the mapped error if it is an Err, otherwise the error as-is.
      */
     mapErr: <T extends Error>(mapper: (error: E) => T) => Result<V, T>;
+
+    /**
+     * Chains a new Result to the current one, if it is Ok.
+     * 
+     * @param mapper The mapper function to apply to the value if it is an Ok.
+     * @returns A new Result with the mapped value if it is an Ok, otherwise the value as-is.
+     */
+    then: <T>(mapper: (value: V) => Result<T, E>) => Result<T, E>;
 }
 
 /**
@@ -78,6 +86,10 @@ export class Ok<V, E extends Error> extends Left<V, E> implements Result<V, E> {
     mapErr<T extends Error>(mapper: (error: E) => T): Result<V, T> {
         return new Ok(this.value);
     }
+
+    then<T>(mapper: (value: V) => Result<T, E>): Result<T, E> {
+        return mapper(this.value);
+    }
 }
 
 /**
@@ -111,5 +123,9 @@ export class Err<V, E extends Error> extends Right<V, E> implements Result<V, E>
 
     mapErr<T extends Error>(mapper: (error: E) => T): Result<V, T> {
         return new Err(mapper(this.value));
+    }
+
+    then<T>(mapper: (value: V) => Result<T, E>): Result<T, E> {
+        return new Err(this.value);
     }
 }

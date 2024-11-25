@@ -77,6 +77,21 @@ describe("Result", () => {
             expect(newError.message).toBe(error.message);
         });
     });
+
+    describe("then()", () => {
+        it("returns the mapped value for Ok", () => {
+            const result = ok("a");
+            const mapped = result.then(v => ok(v.toUpperCase()));
+            expect(mapped.valueOr("b")).toBe("A");
+        });
+
+        it("returns the error for Err", () => {
+            const error = new Error();
+            const result = err(error);
+            const mapped = result.then(v => ok(v.toUpperCase()));
+            expect(mapped.getRightOrThrow()).toBe(error);
+        });
+    });
 });
 
 function ok(value: string): Result<string, Error> {
