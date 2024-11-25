@@ -221,6 +221,16 @@ describe("Either", () => {
             expect(r.getRightOrThrow()).toBe("a");
         });
     });
+
+    describe("toString()", () => {
+        it("converts to a string", () => {
+            const l = left(1);
+            expect(l.toString()).toBe("Left(1)");
+
+            const r = right("a");
+            expect(r.toString()).toBe("Right(a)");
+        });
+    });
 });
 
 function left(value: number): Either<number, string> {
