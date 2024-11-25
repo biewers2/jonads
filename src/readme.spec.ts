@@ -1,4 +1,4 @@
-import { Either, Left, Right, Result, Ok, Err, doing, trying, tryCatching } from "./index";
+import { Either, Left, Right, Result, Ok, Err, doing, trying, tryCatching } from "./jonads";
 
 describe("README", () => {
     describe("Either examples", () => {
