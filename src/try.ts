@@ -1,4 +1,4 @@
-import { Result, Ok, Err } from "./result";
+import { Result } from "./result/result";
 
 /**
  * A type representing a class that extends `Error`.
@@ -13,9 +13,9 @@ export type ErrorClass = { new(...args: any[]): Error };
  */
 export function trying<T, E extends Error>(block: () => T): Result<T, E> {
     try {
-        return new Ok(block());
+        return Result.ok(block());
     } catch (e) {
-        return new Err(e);
+        return Result.err(e);
     }
 }
 
@@ -27,9 +27,9 @@ export function trying<T, E extends Error>(block: () => T): Result<T, E> {
  */
 export async function tryingAsync<T, E extends Error>(block: () => Promise<T>): Promise<Result<T, E>> {
     try {
-        return new Ok(await block());
+        return Result.ok(await block());
     } catch (e) {
-        return new Err(e);
+        return Result.err(e);
     }
 }
 
@@ -48,7 +48,7 @@ export function tryCatching<T, E extends Error>(errors: ErrorClass[], block: () 
     }
 
     try {
-        return new Ok(block());
+        return Result.ok(block());
     } catch (e) {
         return handleTryError(e, errors);
     }
@@ -69,7 +69,7 @@ export async function tryCatchingAsync<T, E extends Error>(errors: ErrorClass[],
     }
 
     try {
-        return new Ok(await block());
+        return Result.ok(await block());
     } catch (e) {
         return handleTryError(e, errors);
     }
@@ -77,7 +77,7 @@ export async function tryCatchingAsync<T, E extends Error>(errors: ErrorClass[],
 
 function handleTryError<E extends Error>(e: E, errors: ErrorClass[]): Result<never, E> {
     if (errors.some(err => e instanceof err)) {
-        return new Err(e);
+        return Result.err(e);
     }
     throw e;
 }

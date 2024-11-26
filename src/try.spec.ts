@@ -74,6 +74,17 @@ describe("tryCatching", () => {
         expect(result.getRightOrThrow()).toBeInstanceOf(TwoError);
     });
 
+    it("returns an Err from the block when no errors are specified but one is thrown", () => {
+        class CustomError extends Error {}
+
+        const result = tryCatching([], () => {
+            throw new CustomError();
+        });
+
+        expect(result.isErr()).toBe(true);
+        expect(result.getRightOrThrow()).toBeInstanceOf(CustomError);
+    });
+
     it("propagates the thrown exception when it is not part of the specified errors", () => {
         class ExpectedError extends Error {}
         class UnexpectedError extends Error {}
@@ -110,6 +121,17 @@ describe("tryCatchingAsync", () => {
 
         expect(result.isErr()).toBe(true);
         expect(result.getRightOrThrow()).toBeInstanceOf(TwoError);
+    });
+
+    it("returns an Err from the block when no errors are specified but one is thrown", async () => {
+        class CustomError extends Error {}
+
+        const result = await tryCatchingAsync([], async () => {
+            throw new CustomError();
+        });
+
+        expect(result.isErr()).toBe(true);
+        expect(result.getRightOrThrow()).toBeInstanceOf(CustomError);
     });
 
     it("propagates the thrown exception when it is not part of the specified errors", async () => {

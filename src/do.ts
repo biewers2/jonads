@@ -1,6 +1,6 @@
 import { JonadsError } from "./errors";
 import { isPromise } from "./guards";
-import { Result, Ok, Err } from "./result";
+import { Result } from "./result/result";
 
 /**
  * An error that is thrown when a failure is propagated from a result in a do block.
@@ -82,7 +82,7 @@ async function bindPromisedResult<T, E extends Error>(result: Result<T, E> | Pro
 export function doing<T, E extends Error>(block: (bind: typeof bindResult) => T, catchall = true): Result<T, E> {
     try {
         const output = block(bindResult);
-        return new Ok(output);
+        return Result.ok(output);
     } catch (e) {
         return handleDoError(e, catchall);
     }
@@ -116,7 +116,7 @@ export function doing<T, E extends Error>(block: (bind: typeof bindResult) => T,
 export async function doingAsync<T, E extends Error>(block: (bind: typeof bindPromisedResult) => Promise<T>, catchall = true): Promise<Result<T, E>> {
     try {
         const output = await block(bindPromisedResult);
-        return new Ok(output);
+        return Result.ok(output);
     } catch (e) {
         return handleDoError(e, catchall);
     }
@@ -124,9 +124,9 @@ export async function doingAsync<T, E extends Error>(block: (bind: typeof bindPr
 
 function handleDoError<E extends Error>(e: E, catchall: boolean): Result<never, E> {
     if (e instanceof DoPropagateError) {
-        return new Err(e.getError());
+        return Result.err(e.getError());
     } else if (catchall) {
-        return new Err(e);
+        return Result.err(e);
     } else {
         throw e;
     }

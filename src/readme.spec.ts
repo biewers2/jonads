@@ -1,48 +1,62 @@
-import { Either, Left, Right, Result, Ok, Err, doing, trying, tryCatching } from "./jonads";
+import { Either, Result, doing, tryingAsync } from "./jonads";
 
 describe("README", () => {
     describe("Either examples", () => {
-        it("passes", () => {
-            let numericValue: Either<number, string>;
+        test("instantiating 'Either'", () => {
+            const lefty: Either<number, string> = Either.left(3);
+            const righty: Either<number, string> = Either.right("5");
 
-            numericValue = new Left(3);
-            expect(numericValue.isLeft()).toBe(true);
-            expect(numericValue.leftOr(right => parseInt(right))).toBe(3);
+            expect(lefty.isLeft()).toBe(true);
+            expect(righty.isRight()).toBe(true);
+        });
 
-            numericValue = new Right("5");
-            expect(numericValue.isRight()).toBe(true);
-            expect(numericValue.leftOr(right => parseInt(right))).toBe(5);
+        test("working with values using 'Either'", () => {
+            let numbery: Either<number, string>;
+
+            numbery = Either.left(3);
+            expect(numbery.isLeft()).toBe(true);
+            expect(numbery.leftOr(s => parseInt(s))).toBe(3);
+
+            numbery = Either.right("5");
+            expect(numbery.isRight()).toBe(true);
+            expect(numbery.leftOr(s => parseInt(s))).toBe(5);
         });
     });
 
     describe("Result examples", () => {
-        type User = { id: number, name: string };
+        test("instantiating 'Result'", () => {
+            const okish: Result<string, Error> = Result.ok("I'm ok!");
+            const errish: Result<string, Error> = Result.err(new Error("I'm not ok!"));
 
-        class GetUserError extends Error {}
-
-        function getUser(id: number): Result<User, GetUserError> {
-            if (id > 0) {
-                return new Ok({ id, name: "John Doe" });
-            } else {
-                return new Err(new GetUserError("Invalid user ID"));
-            }
-        }
-
-        it("passes first part", () => {
-            const result: Result<User, GetUserError> = getUser(1);
-            expect(result.isOk()).toBe(true);
-
-            const newResult = result.map(user => user.name);
-            expect(newResult.isOk()).toBe(true);
-
+            expect(okish.isOk()).toBe(true);
+            expect(errish.isErr()).toBe(true);
         });
 
-        it("passes second part", () => {
-            const result: Result<string, GetUserError> = getUser(-1).map(user => user.name);
+        test("working with values using 'Result'", async () => {
+            class HttpError extends Error {}
+
+            async function safeFetch(url: string): Promise<Result<Response, HttpError>> {
+                if (url === "https://invalid.com") {
+                    return Result.err(new HttpError("Invalid URL"));
+                } else {
+                    return Result.ok(new Response(JSON.stringify({ data: "..." })));
+                }
+            }
+
+            let result: Result<Response, HttpError>;
+            let body: Result<object, HttpError>;
+
+            result = await safeFetch("https://example.com/api/data");
+            expect(result.isOk()).toBe(true);
+
+            body = await result.mapAsync(async response => await response.json());
+            expect(body.valueOr({})).toEqual({ data: "..." });
+
+            result = await safeFetch("https://invalid.com");
             expect(result.isErr()).toBe(true);
 
-            const name = result.valueOr("unknown");
-            expect(name).toBe("unknown");
+            body = await result.mapAsync(async response => await response.json());
+            expect(body.valueOr({})).toEqual({});
         });
     });
 
@@ -56,17 +70,17 @@ describe("README", () => {
 
         function getUser(id: number): Result<User, GetUserError> {
             if (id > 0) {
-                return new Ok({ id, workspaceId: 1 });
+                return Result.ok({ id, workspaceId: 1 });
             } else {
-                return new Err(new GetUserError("Invalid user ID"));
+                return Result.err(new GetUserError("Invalid user ID"));
             }
         }
 
         function getWorkspace(id: number): Result<Workspace, GetWorkspaceError> {
             if (id > 0) {
-                return new Ok({ id, name: "My Workspace" });
+                return Result.ok({ id, name: "My Workspace" });
             } else {
-                return new Err(new GetWorkspaceError("Invalid workspace ID"));
+                return Result.err(new GetWorkspaceError("Invalid workspace ID"));
             }
         }
 
@@ -76,13 +90,13 @@ describe("README", () => {
             return workspace.name
         });
 
-        it("passes first part", () => {
+        test("passes first part", () => {
             const result = getUserWorkspaceName(1);
             expect(result.isOk()).toBe(true);
             expect(result.getLeftOrThrow()).toBe("My Workspace");
         });
 
-        it("passes second part", () => {
+        test("passes second part", () => {
             const result = getUserWorkspaceName(-1);
             expect(result.isErr()).toBe(true);
             expect(result.getRightOrThrow()).toBeInstanceOf(GetUserError);
@@ -90,33 +104,18 @@ describe("README", () => {
     });
 
     describe("trying examples", () => {
-        class NonSingleDigitError extends Error {}
-        class NegativeNumberError extends Error {}
-
-        function onlySingleDigit(value: number): number {
-            if (value < -9 || value > 9) {
-                throw new NonSingleDigitError();
-            } else {
-                return value;
-            }
+        async function fakeFetch(url: string): Promise<Response> {
+            return new Response(JSON.stringify({ data: "..." }));
         }
 
-        it("passes first part", () => {
-            const result = trying(() => onlySingleDigit(3));
+        test("using 'tryCatching'", async () => {
+            const result: Result<Response, Error> = await tryingAsync(async () => await fakeFetch("https://example.com"));
             expect(result.isOk()).toBe(true);
-            expect(result.getLeftOrThrow()).toBe(3);
-        });
 
-        it("passes second part", () => {
-            const result = trying(() => onlySingleDigit(10));
-            expect(result.isErr()).toBe(true);
-            expect(result.getRightOrThrow()).toBeInstanceOf(NonSingleDigitError);
-        });
-
-        it("passes third part", () => {
-            expect(() =>
-                tryCatching([NegativeNumberError], () => onlySingleDigit(-10))
-            ).toThrow(NonSingleDigitError);
+            result.matchAsync(
+                async res => expect(await res.json()).toEqual({ data: "..." }),
+                async err => { throw err; } // This should not happen
+            );
         });
     });
 });
