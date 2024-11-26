@@ -2,83 +2,145 @@
 
 A set of monadic classes ("Jonads") and utilities for writing clean, programmatically correct code.
 
-## Jonads List
+## List of Jonads
 
-Jonads are simply Javascript classes that use inheritence and Typescript interfaces to create monadic structures for
-implementing safety in error-prone code.
+Jonads are Javascript classes that implement Typescript interfaces to create monadic structures for
+creating safe, idiomatic code.
 
 ### Either
 
-Either left or right. This Jonad represents one of two possible values. It is the base type of others that are similar
-to it, such as `Result`.
+Either left or right. This Jonad represents one of two possible values. It is the base type of other Jonads, such as
+`Result` and `Option`.
 
-There are two concrete types `Left` and `Right` that can be initialized like any other Javascript class, but implement
-the `Either` interface. This jonad is useful for representing a single value that can be of two different variants, but
-come with type-safety measure through the utility functions defined by the interface they implement.
+There are two concrete types `Left` and `Right` that implement the `Either` interface. Like all other jonads, these
+classes aren't exposed in this package, but can be created through calls to the related `Either` const object. See the
+examples below for how to do this. This jonad is useful for representing a single value that can be of two different
+variants, but come with type-safety measure through the utility functions defined by the interface.
 
 #### Examples
 
-Working with values using `Either`.
-_(Code is in javascript, but annotated with Typescript types)_
+Instantiating `Either` using the provided const object:
 
-```javascript
-let numericValue; // Either<number, string>
+```typescript
+const lefty: Either<number, string> = Either.left(3);
+const righty: Either<number, string> = Either.right("5");
 
-numericValue = new Left(3);
-console.log(numericValue.isLeft());
+console.log(lefty.isLeft());
 // => true
-console.log(numericValue.leftOr(right => parseInt(right)));
+console.log(right.isRight());
+// => true
+```
+
+Working with values using `Either`.
+
+```typescript
+let numbery: Either<number, string>;
+
+numbery = Either.left(3);
+console.log(numbery.isLeft());
+// => true
+console.log(numbery.leftOr(s => parseInt(s)));
 // => 3
 
 // ...
 
-numericValue = new Right("5");
-console.log(numericValue.isRight());
+numbery = Either.right("5");
+console.log(numbery.isRight());
 // => true
-console.log(numericValue.leftOr(right => parseInt(right)));
+console.log(numbery.leftOr(s => parseInt(s)));
 // => 5
 ```
 
 ### Result
 
-Result represents a value or an error that can be associated with an attempt to resolve the value.
-
-This is a subtype of `Either`, so it also has two concrete classes: `Ok` and `Err`.
+Result represents a value or an error that can be associated with an attempt to resolve the value. This is a subtype
+of `Either`, and also has two implicit concrete classes: `Ok` representing any value and `Err` representing an error
+that occurred during the attempt to resolve the value.
 
 #### Examples
 
+Instantiating `Result` using the provided const object:
+
+```typescript
+const okish: Result<string, Error> = Result.ok("I'm ok!");
+const errish: Result<string, Error> = Result.err(new Error("I'm not ok!"));
+
+console.log(okish.isOk());
+// => true
+console.log(errish.isErr());
+// => true
+```
+
 Working with values using `Result`.
-_(Code is in javascript, but annotated with Typescript types)_
 
-```javascript
-// getUser(id: number): Result<User, GetUserError>
-function getUser(id) {
-    try {
-        const user = db.find(id);
-        return Ok(user);
-    } catch (e) {
-        return Err(new GetUserError(`failed to get user: ${e.message}`))
-    }
-}
+```typescript
+// async function safeFetch(url: string): Promise<Result<Response, HttpError>>
 
-let result; // Result<User, GetUserError>
+// When the fetch is successful...
 
-result = getUser(1);
+const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
 console.log(result.isOk());
 // => true
-const newResult = result.map(user => user.name);
-console.log(newResult);
-// => Ok("John")
 
-// ...
+const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
+console.log(body.valueOr({}));
+// => { data: "..." }
 
-result = getUser(-1).map(user => user.name);
+// ...when the fetch is not successful...
+
+const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
 console.log(result.isErr());
-// => true
-const name = result.valueOr("unknown");
-console.log(name);
-// => "unknown"
+
+const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
+console.log(body.valueOr({}));
+// => {}
 ```
+
+### Option
+
+Option represents a value that may or may not exist. This is a subtype of `Either`, and also has two implicit concrete
+classes: `Ok` representing any value and `Err` representing an error that occurred during the attempt to resolve the
+value.
+
+#### Examples
+
+Instantiating `Result` using the provided const object:
+
+```typescript
+const okish: Result<string, Error> = Result.ok("I'm ok!");
+const errish: Result<string, Error> = Result.err(new Error("I'm not ok!"));
+
+console.log(okish.isOk());
+// => true
+console.log(errish.isErr());
+// => true
+```
+
+Working with values using `Result`.
+
+```typescript
+// async function safeFetch(url: string): Promise<Result<Response, HttpError>>
+
+// When the fetch is successful...
+
+const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
+console.log(result.isOk());
+// => true
+
+const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
+console.log(body.valueOr({}));
+// => { data: "..." }
+
+// ...when the fetch is not successful...
+
+const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
+console.log(result.isErr());
+
+const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
+console.log(body.valueOr({}));
+// => {}
+```
+
 
 ## Working with Jonads
 
@@ -90,10 +152,10 @@ functions aren't supplied.
 There's a concept in Haskell called "do-notation". Effectively, this notation allows Haskell to extract the side-effects
 from function/service calls (for us, `Err` in a `Result`) and focus primarily on the happy-path values.
 
-To recreate this notation, the `doing` function can be used to run a sequence of services that return "results".
-By calling this function at the top of any function, and passing the actual function logic to it through a callback, `doing`
-can capture any thrown errors into `Err` values and allow you, the developer, to extract the side-effects away from the function's
-logic via a call to the provided `bind` function.
+To recreate this notation, the `doing` function can be used to run a sequence of services (fallible functions).
+By calling this function at the top of any function, and passing the actual function logic to it through a callback,
+`doing` can capture any thrown errors into `Err` values and allow you, the developer, to extract the side-effects
+away from the function's logic via a call to the provided `bind` function.
 
 #### Examples
 
@@ -121,26 +183,13 @@ want to capture specific (or any) execption from a single function call that may
 using `trying` and `tryCatching`.
 
 ```javascript
-class NonSingleDigitError extends Error {}
+const result: Result<Response, Error> = await tryingAsync(async () => await fetch("https://example.com"));
+console.log(result.isOk());
+// => true
 
-function onlySingleDigit(value) {
-    if (value < -9 || value > 9) {
-        throw new NonSingleDigitError();
-    } else {
-        return value;
-    }
-}
-
-console.log(trying(() => onlySingleDigit(3)));
-// => Ok(3)
-
-console.log(trying(() => onlySingleDigit(10)));
-// => Err(NonSingleDigitError)
-
-// ...
-
-class NegativeNumberError extends Error {}
-
-console.log(tryCatching([NegativeNumberError], () => onlySingleDigit(-10)));
-// throws `NonSingleDigitError`.
+result.matchAsync(
+    res => console.log(await res.json()),
+    err => console.error(err),
+);
+// => { data: "..." }
 ```

@@ -65,6 +65,24 @@ export class Left<L, R> implements Either<L, R> {
         return Promise.resolve(new Left(this.value));
     }
 
+    tapLeft(callback: (value: L) => void): Either<L, R> {
+        callback(this.value);
+        return this;
+    }
+
+    async tapLeftAsync(callback: (value: L) => Promise<void>): Promise<Either<L, R>> {
+        await callback(this.value);
+        return this;
+    }
+
+    tapRight(callback: (value: R) => void): Either<L, R> {
+        return this;
+    }
+
+    async tapRightAsync(callback: (value: R) => Promise<void>): Promise<Either<L, R>> {
+        return this;
+    }
+
     match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
         return onLeft(this.value);
     }

@@ -90,6 +90,42 @@ describe("Right", () => {
         });
     });
 
+    describe("tapLeft()", () => {
+        it("does nothing", () => {
+            let r = Either.right<{[k: string]: number}, number[]>([]);
+            r.tapLeft((obj) => { obj["key"] = 1 });
+
+            expect(r.getRightOrThrow()).toEqual([]);
+        });
+    });
+
+    describe("tapLeftAsync()", () => {
+        it("does nothing", async () => {
+            let r = Either.right<{[k: string]: number}, number[]>([]);
+            await r.tapLeftAsync(async (obj) => { obj["key"] = 1 });
+
+            expect(r.getRightOrThrow()).toEqual([]);
+        });
+    });
+
+    describe("tapRight()", () => {
+        it("calls the callback", () => {
+            let r = Either.right<{[k: string]: number}, number[]>([]);
+            r.tapRight((arr) => { arr.push(1) });
+
+            expect(r.getRightOrThrow()).toEqual([1]);
+        });
+    });
+
+    describe("tapRightAsync()", () => {
+        it("calls the callback", async () => {
+            let r = Either.right<{[k: string]: number}, number[]>([]);
+            await r.tapRightAsync(async (arr) => { arr.push(1) });
+
+            expect(r.getRightOrThrow()).toEqual([1]);
+        });
+    });
+
     describe("match()", () => {
         it("calls the onRight function", () => {
             const r = Either.right<number, string>("5");

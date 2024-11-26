@@ -111,6 +111,38 @@ export interface Either<L, R> {
     mapRightAsync: <V>(mapper: (value: R) => Promise<V>) => Promise<Either<L, V>>;
 
     /**
+     * Applies a function to the value if it is a Left, returning itself.
+     * 
+     * @param callback The function to apply to the value if it is a Left.
+     * @returns The Either as-is.
+     */
+    tapLeft: (callback: (value: L) => void) => Either<L, R>;
+
+    /**
+     * Asynchronously applies a function to the value if it is a Left, returning itself.
+     * 
+     * @param callback The async function to apply to the value if it is a Left.
+     * @returns The Either as-is.
+     */
+    tapLeftAsync: (callback: (value: L) => Promise<void>) => Promise<Either<L, R>>;
+
+    /**
+     * Applies a function to the value if it is a Right, returning itself.
+     * 
+     * @param callback The function to apply to the value if it is a Right.
+     * @returns The Either as-is.
+     */
+    tapRight: (callback: (value: R) => void) => Either<L, R>;
+
+    /**
+     * Asynchronously applies a function to the value if it is a Right, returning itself.
+     * 
+     * @param callback The async function to apply to the value if it is a Right.
+     * @returns The Either as-is.
+     */
+    tapRightAsync: (callback: (value: R) => Promise<void>) => Promise<Either<L, R>>;
+
+    /**
      * Matches the jonad by calling the appropriate callback based on the value type.
      * 
      * @param onLeft If the value is a Left, this callback is called with the value.

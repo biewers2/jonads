@@ -90,6 +90,42 @@ describe("Left", () => {
         });
     });
 
+    describe("tapLeft()", () => {
+        it("calls the callback", () => {
+            let l = Either.left<{[k: string]: number}, number[]>({});
+            l.tapLeft((obj) => { obj["key"] = 1 });
+
+            expect(l.getLeftOrThrow()).toEqual({ key: 1 });
+        });
+    });
+
+    describe("tapLeftAsync()", () => {
+        it("calls the callback", async () => {
+            let l = Either.left<{[k: string]: number}, number[]>({});
+            await l.tapLeftAsync(async (obj) => { obj["key"] = 1 });
+
+            expect(l.getLeftOrThrow()).toEqual({ key: 1 });
+        });
+    });
+
+    describe("tapRight()", () => {
+        it("does nothing", () => {
+            let l = Either.left<{[k: string]: number}, number[]>({});
+            l.tapRight((arr) => { arr.push(1) });
+
+            expect(l.getLeftOrThrow()).toEqual({});
+        });
+    });
+
+    describe("tapRightAsync()", () => {
+        it("does nothing", async () => {
+            let l = Either.left<{[k: string]: number}, number[]>({});
+            await l.tapRightAsync(async (arr) => { arr.push(1) });
+
+            expect(l.getLeftOrThrow()).toEqual({});
+        });
+    });
+
     describe("match()", () => {
         it("calls the onLeft function", () => {
             const l = Either.left<number, string>(1);
