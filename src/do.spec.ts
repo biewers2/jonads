@@ -1,13 +1,12 @@
 import { doing, doingAsync } from "./do";
-import { Result, Ok, Err } from "./result";
-import { ok } from "./testing";
+import { Result } from "./result/result";
 
 describe("doing", () => {
     it("returns the value produced through the chain of functions", () => {
         const result = doing(bind => {
-            const a = bind(new Ok(1));
-            const b = bind(new Ok(a + 1));
-            const c = bind(new Ok(b + 1));
+            const a = bind(Result.ok(1));
+            const b = bind(Result.ok(a + 1));
+            const c = bind(Result.ok(b + 1));
             return c + 1;
         });
 
@@ -19,9 +18,9 @@ describe("doing", () => {
         class SecondError extends Error {}
 
         const result = doing(bind => {
-            const a = bind(new Ok(1));
-            const b = bind<number, FirstError>(new Err(new FirstError()));
-            const c = bind<number, SecondError>(new Err(new SecondError()));
+            const a = bind(Result.ok(1));
+            const b = bind<number, FirstError>(Result.err(new FirstError()));
+            const c = bind<number, SecondError>(Result.err(new SecondError()));
             return c;
         });
 
@@ -58,9 +57,9 @@ describe("doing", () => {
 describe("doingAsync", () => {
     it("returns the value produced through the chain of functions", async () => {
         const result = await doingAsync(async bind => {
-            const a = await bind(new Ok(1));
-            const b = await bind(new Ok(a + 1));
-            const c = await bind(new Ok(b + 1));
+            const a = await bind(Result.ok(1));
+            const b = await bind(Result.ok(a + 1));
+            const c = await bind(Result.ok(b + 1));
             return c + 1;
         });
 
@@ -72,9 +71,9 @@ describe("doingAsync", () => {
         class SecondError extends Error {}
 
         const result = await doingAsync(async bind => {
-            const a = await bind(new Ok(1));
-            const b = await bind<number, FirstError>(new Err(new FirstError()));
-            const c = await bind<number, SecondError>(new Err(new SecondError()));
+            const a = await bind(Result.ok(1));
+            const b = await bind<number, FirstError>(Result.err(new FirstError()));
+            const c = await bind<number, SecondError>(Result.err(new SecondError()));
             return c;
         });
 
@@ -84,7 +83,7 @@ describe("doingAsync", () => {
 
     it("returns the value produced through the chain of functions when bind is given a promise", async () => {
         async function promised(value: number): Promise<Result<number, Error>> {
-            return ok(value);
+            return Result.ok(value);
         }
 
         const result = await doingAsync(async bind => {

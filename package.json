@@ -5,9 +5,15 @@
   "types": "dist/jonads.d.ts",
   "scripts": {
     "build": "rm -rf dist/* && tsc",
-    "test": "jest"
+    "test": "jest",
+    "doc": "npx typedoc src/jonads.ts"
   },
-  "keywords": ["monads", "functional programming", "typescript", "fp"],
+  "keywords": [
+    "monads",
+    "functional programming",
+    "typescript",
+    "fp"
+  ],
   "author": "",
   "license": "ISC",
   "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
@@ -17,6 +23,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
-    "ts-jest": "^29.2.5"
+    "ts-jest": "^29.2.5",
+    "typedoc": "^0.26.11"
   }
 }

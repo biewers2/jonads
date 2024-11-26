@@ -1,15 +1,15 @@
-import { Either, Err, Left, Ok, Result, Right, doing, tryCatching, trying } from "./jonads";
+import { Either, Result, doing, tryCatching, trying } from "./jonads";
 
 describe("README", () => {
     describe("Either examples", () => {
         it("passes", () => {
             let numericValue: Either<number, string>;
 
-            numericValue = new Left(3);
+            numericValue = Either.left(3);
             expect(numericValue.isLeft()).toBe(true);
             expect(numericValue.leftOr(right => parseInt(right))).toBe(3);
 
-            numericValue = new Right("5");
+            numericValue = Either.right("5");
             expect(numericValue.isRight()).toBe(true);
             expect(numericValue.leftOr(right => parseInt(right))).toBe(5);
         });
@@ -22,9 +22,9 @@ describe("README", () => {
 
         function getUser(id: number): Result<User, GetUserError> {
             if (id > 0) {
-                return new Ok({ id, name: "John Doe" });
+                return Result.ok({ id, name: "John Doe" });
             } else {
-                return new Err(new GetUserError("Invalid user ID"));
+                return Result.err(new GetUserError("Invalid user ID"));
             }
         }
 
@@ -56,17 +56,17 @@ describe("README", () => {
 
         function getUser(id: number): Result<User, GetUserError> {
             if (id > 0) {
-                return new Ok({ id, workspaceId: 1 });
+                return Result.ok({ id, workspaceId: 1 });
             } else {
-                return new Err(new GetUserError("Invalid user ID"));
+                return Result.err(new GetUserError("Invalid user ID"));
             }
         }
 
         function getWorkspace(id: number): Result<Workspace, GetWorkspaceError> {
             if (id > 0) {
-                return new Ok({ id, name: "My Workspace" });
+                return Result.ok({ id, name: "My Workspace" });
             } else {
-                return new Err(new GetWorkspaceError("Invalid workspace ID"));
+                return Result.err(new GetWorkspaceError("Invalid workspace ID"));
             }
         }
 

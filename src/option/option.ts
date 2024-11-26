@@ -1,6 +1,7 @@
-import { Either, Left, Right } from "./either";
-import { isFunction } from "./guards";
-import { Ok, Result } from "./result";
+import { Either } from "../either/either";
+import { Some } from "./some";
+import { None } from "./none";
+import { Result } from "../result/result";
 
 /**
  * An Option jonad.
@@ -72,90 +73,6 @@ export interface Option<T> extends Either<T, null> {
     andThenAsync: <U>(mapper: (value: T) => Promise<Option<U>>) => Promise<Option<U>>;
 }
 
-export class Some<T> extends Left<T, null> implements Option<T> {
-    constructor(value: T) {
-        super(value);
-    }
-
-    isSome(): boolean {
-        return true;
-    }
-
-    isNone(): boolean {
-        return false;
-    }
-
-    valueOr(fallback: T | (() => T)): T {
-        return this.value;
-    }
-
-    async valueOrAsync(fallback: T | (() => Promise<T>)): Promise<T> {
-        return this.value;
-    }
-
-    map<U>(mapper: (value: T) => U): Option<U> {
-        return new Some(mapper(this.value));
-    }
-
-    async mapAsync<U>(mapper: (value: T) => Promise<U>): Promise<Option<U>> {
-        return new Some(await mapper(this.value));
-    }
-
-    andThen<U>(mapper: (value: T) => Option<U>): Option<U> {
-        return mapper(this.value);
-    }
-
-    async andThenAsync<U>(mapper: (value: T) => Promise<Option<U>>): Promise<Option<U>> {
-        return mapper(this.value);
-    }
-}
-
-export class None<T> extends Right<T, null> implements Option<T> {
-    constructor() {
-        super(null);
-    }
-
-    isSome(): boolean {
-        return false;
-    }
-
-    isNone(): boolean {
-        return true;
-    }
-
-    valueOr(fallback: T | (() => T)): T {
-        if (isFunction(fallback)) {
-            return fallback();
-        } else {
-            return fallback;
-        }
-    }
-
-    async valueOrAsync(fallback: T | (() => Promise<T>)): Promise<T> {
-        if (isFunction(fallback)) {
-            return await fallback();
-        } else {
-            return fallback;
-        }
-    }
-
-    map<U>(mapper: (value: T) => U): Option<U> {
-        return new None();
-    }
-
-    async mapAsync<U>(mapper: (value: T) => Promise<U>): Promise<Option<U>> {
-        return new None();
-    }
-
-    andThen<U>(mapper: (value: T) => Option<U>): Option<U> {
-        return new None();
-    }
-
-    async andThenAsync<U>(mapper: (value: T) => Promise<Option<U>>): Promise<Option<U>> {
-        return new None();
-    }
-}
-
 /**
  * Option-related utilities.
  */
@@ -172,6 +89,15 @@ export const Option = {
         } else {
             return new Some(value);
         }
+    },
+
+    /**
+     * Creates a new Option with the right-value `None`. 
+     * 
+     * @returns A new Option with the right-value `None`.
+     */
+    none: <T>(): Option<T> => {
+        return new None();
     },
 
     /**
@@ -196,7 +122,7 @@ export const Option = {
     transpose: <T, E extends Error>(option: Option<Result<T, E>>): Result<Option<T>, E> => {
         return option.match<Result<Option<T>, E>>(
             some_result => some_result.map(value => new Some(value)),
-            () => new Ok(new None())
+            () => Result.ok(Option.none())
         )
     },
 }

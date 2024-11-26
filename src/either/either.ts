@@ -1,5 +1,5 @@
-import { GetValueError } from "./errors";
-import { isFunction } from "./guards";
+import { Left } from "./left";
+import { Right } from "./right";
 
 /**
  * An Either jonad.
@@ -12,6 +12,12 @@ export interface Either<L, R> {
      * Checks if the value is a Left.
      * 
      * @returns true if the value is a Left, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const value = Either.left(42);
+     * value.isLeft(); // => true
+     * ```
      */
     isLeft: () => boolean;
 
@@ -19,6 +25,12 @@ export interface Either<L, R> {
      * Checks if the value is a Right.
      * 
      * @returns true if the value is a Right, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const value = Either.right(42);
+     * value.isRight(); // => true
+     * ```
      */
     isRight: () => boolean;
 
@@ -27,6 +39,18 @@ export interface Either<L, R> {
      * 
      * @param fallback The default value (as-is or produced from a callback) to return if the value is a Right.
      * @returns The value if it is a Left, otherwise the default value.
+     * 
+     * @example
+     * ```typescript
+     * const value = Either.left(42);
+     * value.leftOr(0); // => 42
+     * ```
+     * 
+     * @example
+     * ```typescript
+     * const value = Either.right(42);
+     * value.leftOr(0); // => 0
+     * ```
      */
     leftOr: (fallback: L | ((right: R) => L)) => L;
 
@@ -123,169 +147,22 @@ export interface Either<L, R> {
 }
 
 /**
- * An Either jonad with a Left value.
+ * Either-related utilities.
  */
-export class Left<L, R> implements Either<L, R> {
-    protected value: L;
+export const Either = {
+    /**
+     * Creates a new Left instance.
+     * 
+     * @param value The value to wrap.
+     * @returns A new Left instance.
+     */
+    left: <L, R>(value: L): Either<L, R> => new Left(value),
 
     /**
-     * Creates a new Left instance with the given value.
+     * Creates a new Right instance.
      * 
-     * @param value The value to store in the Left instance.
+     * @param value The error to wrap.
+     * @returns A new Right instance.
      */
-    constructor(value: L) {
-        this.value = value;
-    }
-
-    isLeft(): boolean {
-        return true;
-    }
-
-    isRight(): boolean {
-        return false;
-    }
-
-    leftOr(fallback: L | ((right: R) => L)): L {
-        return this.value;
-    }
-
-    async leftOrAsync(fallback: L | ((right: R) => Promise<L>)): Promise<L> {
-        return this.value;
-    }
-
-    rightOr(fallback: R | ((left: L) => R)): R {
-        if (isFunction(fallback)) {
-            return fallback(this.value);
-        } else {
-            return fallback;
-        }
-    }
-
-    async rightOrAsync(fallback: R | ((left: L) => Promise<R>)): Promise<R> {
-        if (isFunction(fallback)) {
-            return await fallback(this.value);
-        } else {
-            return fallback;
-        }
-    }
-
-    mapLeft<T>(mapper: (value: L) => T): Either<T, R> {
-        return new Left(mapper(this.value));
-    }
-
-    async mapLeftAsync<V>(mapper: (value: L) => Promise<V>): Promise<Either<V, R>> {
-        return mapper(this.value).then(v => new Left(v));
-    }
-
-    mapRight<T>(mapper: (value: R) => T): Either<L, T> {
-        return new Left(this.value);
-    }
-
-    async mapRightAsync<V>(mapper: (value: R) => Promise<V>): Promise<Either<L, V>> {
-        return Promise.resolve(new Left(this.value));
-    }
-
-    match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
-        return onLeft(this.value);
-    }
-
-    async matchAsync<T>(onLeft: (value: L) => Promise<T>, onRight: (value: R) => Promise<T>): Promise<T> {
-        return onLeft(this.value);
-    }
-
-    getLeftOrThrow(): L {
-        return this.value;
-    }
-
-    getRightOrThrow(): R {
-        throw new GetValueError("right");
-    }
-
-    toString(): string {
-        return `Left(${this.value})`;
-    }
-}
-
-/**
- * An Either jonad with a Right value.
- */
-export class Right<L, R> implements Either<L, R> {
-    protected value: R;
-
-    /**
-     * Creates a new Right instance with the given value.
-     * 
-     * @param value The value to store in the Right instance.
-     */
-    constructor(value: R) {
-        this.value = value;
-    }
-
-    isLeft(): boolean {
-        return false;
-    }
-
-    isRight(): boolean {
-        return true;
-    }
-
-    leftOr(fallback: L | ((right: R) => L)): L {
-        if (isFunction(fallback)) {
-            return fallback(this.value);
-        } else {
-            return fallback;
-        }
-    }
-
-    async leftOrAsync(fallback: L | ((right: R) => Promise<L>)): Promise<L> {
-        if (isFunction(fallback)) {
-            return await fallback(this.value);
-        } else {
-            return fallback;
-        }
-    }
-
-    rightOr(fallback: R | ((left: L) => R)): R {
-        return this.value;
-    }
-
-    async rightOrAsync(fallback: R | ((left: L) => Promise<R>)): Promise<R> {
-        return this.value;
-    }
-
-    mapLeft<T>(mapper: (value: L) => T): Either<T, R> {
-        return new Right(this.value);
-    }
-
-    async mapLeftAsync<V>(mapper: (value: L) => Promise<V>): Promise<Either<V, R>> {
-        return Promise.resolve(new Right(this.value));
-    }
-
-    mapRight<T>(mapper: (value: R) => T): Either<L, T> {
-        return new Right(mapper(this.value));
-    }
-
-    async mapRightAsync<V>(mapper: (value: R) => Promise<V>): Promise<Either<L, V>> {
-        return mapper(this.value).then(v => new Right(v));
-    }
-
-    match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
-        return onRight(this.value);
-    }
-
-    async matchAsync<T>(onLeft: (value: L) => Promise<T>, onRight: (value: R) => Promise<T>): Promise<T> {
-        return onRight(this.value);
-    }
-
-    getLeftOrThrow(): L {
-        throw new GetValueError("left");
-    }
-
-    getRightOrThrow(): R {
-        return this.value;
-    }
-
-    toString(): string {
-        return `Right(${this.value})`;
-    }
-}
+    right: <L, R>(value: R): Either<L, R> => new Right(value),
+};
