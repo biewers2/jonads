@@ -1,5 +1,6 @@
 import { doing, doingAsync } from "./do";
-import { Ok, Err } from "./result";
+import { Result, Ok, Err } from "./result";
+import { ok } from "./testing";
 
 describe("doing", () => {
     it("returns the value produced through the chain of functions", () => {
@@ -79,6 +80,19 @@ describe("doingAsync", () => {
 
         expect(result.isErr()).toBe(true);
         expect(result.getRightOrThrow()).toBeInstanceOf(FirstError);
+    });
+
+    it("returns the value produced through the chain of functions when bind is given a promise", async () => {
+        async function promised(value: number): Promise<Result<number, Error>> {
+            return ok(value);
+        }
+
+        const result = await doingAsync(async bind => {
+            return 1 + await bind(promised(1));
+        });
+
+        expect(result.getLeftOrThrow()).toBe(2);
+
     });
 
     describe("when catchall is true", () => {

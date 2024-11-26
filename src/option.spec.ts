@@ -154,7 +154,7 @@ describe("Option", () => {
             expect(transposed.isOk()).toBe(true);
             expect(transposed.getLeftOrThrow().isNone()).toBe(true);
         });
-    })
+    });
 });
 
 

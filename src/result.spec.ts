@@ -1,5 +1,7 @@
+import { Result } from './result';
+import { Option } from './option';
 import { JonadsError } from './errors';
-import { ok, err } from './testing';
+import { ok, err, some, none } from './testing';
 
 describe("Result", () => {
     describe("isOk()", () => {
@@ -173,7 +175,7 @@ describe("Result", () => {
 
     describe("ok()", () => {
         it("creates an Ok instance", () => {
-            const result = ok("a");
+            const result = Result.ok("a");
             expect(result.isOk()).toBe(true);
             expect(result.getLeftOrThrow()).toBe("a");
         });
@@ -182,9 +184,38 @@ describe("Result", () => {
     describe("err()", () => {
         it("creates an Err instance", () => {
             const error = new Error();
-            const result = err(error);
+            const result = Result.err(error);
             expect(result.isErr()).toBe(true);
             expect(result.getRightOrThrow()).toBe(error);
+        });
+    });
+
+    describe("transpose()", () => {
+        it("transposes an Ok of a Some into a Some of an Ok", () => {
+            const result = ok(some(1));
+            const transposed = Result.transpose(result);
+
+            expect(transposed.isSome()).toBe(true);
+            const innerResult = transposed.getLeftOrThrow();
+            expect(innerResult.isOk()).toBe(true);
+            expect(innerResult.getLeftOrThrow()).toBe(1);
+        });
+
+        it("transposes an Ok of a None into a None", () => {
+            const result = ok(none());
+            const transposed = Result.transpose(result);
+
+            expect(transposed.isNone()).toBe(true);
+        });
+        
+        it("transposes an Err into a Some of an Err", () => {
+            const result = err<Option<number>, Error>(new Error("oops"));
+            const transposed = Result.transpose(result);
+
+            expect(transposed.isSome()).toBe(true);
+            const innerResult = transposed.getLeftOrThrow();
+            expect(innerResult.isErr()).toBe(true);
+            expect(innerResult.getRightOrThrow()).toBeInstanceOf(Error);
         });
     });
 });
