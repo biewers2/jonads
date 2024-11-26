@@ -1,5 +1,5 @@
-import { Either, Left, Right } from "./either";
 import { GetValueError } from "./errors";
+import { left, right } from "./testing";
 
 describe("Either", () => {
     describe("isLeft()", () => {
@@ -38,7 +38,7 @@ describe("Either", () => {
         });
 
         it("returns the result of the fallback function for Right", () => {
-            const r = right("5");
+            const r = right<number, string>("5");
             expect(r.leftOr(n => parseInt(n))).toBe(5);
         });
     });
@@ -55,7 +55,7 @@ describe("Either", () => {
         });
 
         it("returns the result of the fallback function for Right", async () => {
-            const r = right("5");
+            const r = right<number, string>("5");
             expect(await r.leftOrAsync(async n => parseInt(n))).toBe(5);
         });
     });
@@ -67,7 +67,7 @@ describe("Either", () => {
         });
 
         it("returns the result of the fallback function for Left", () => {
-            const l = left(1);
+            const l = left<number, string>(1);
             expect(l.rightOr(n => n + "")).toBe("1");
         });
 
@@ -84,7 +84,7 @@ describe("Either", () => {
         });
 
         it("returns the result of the fallback function for Left", async () => {
-            const l = left(1);
+            const l = left<number, string>(1);
             expect(await l.rightOrAsync(async n => n + "")).toBe("1");
         });
 
@@ -103,7 +103,7 @@ describe("Either", () => {
         });
 
         it("returns a new Right instance with the same value for Right", () => {
-            const r = right("a");
+            const r = right<number, string>("a");
             const mapped = r.mapLeft((n) => n * 2);
             expect(mapped.isRight()).toBe(true);
             expect(mapped.getRightOrThrow()).toBe("a");
@@ -119,7 +119,7 @@ describe("Either", () => {
         });
 
         it("returns a new Right instance with the same value for Right", async () => {
-            const r = right("a");
+            const r = right<number, string>("a");
             const mapped = await r.mapLeftAsync((n) => Promise.resolve(n * 2));
             expect(mapped.isRight()).toBe(true);
             expect(mapped.getRightOrThrow()).toBe("a");
@@ -159,8 +159,8 @@ describe("Either", () => {
     });
 
     describe("match()", () => {
-        it("calls the on_left function for Left", () => {
-            const l = left(1);
+        it("calls the onLeft function for Left", () => {
+            const l = left<number, string>(1);
             const result = l.match(
                 (n) => n * 2,
                 (s) => parseInt(s)
@@ -168,8 +168,8 @@ describe("Either", () => {
             expect(result).toBe(2);
         });
 
-        it("calls the on_right function for Right", () => {
-            const r = right("5");
+        it("calls the onRight function for Right", () => {
+            const r = right<number, string>("5");
             const result = r.match(
                 (n) => n * 2,
                 (s) => parseInt(s) * 2
@@ -179,8 +179,8 @@ describe("Either", () => {
     });
 
     describe("matchAsync()", () => {
-        it("calls the on_left function for Left", async () => {
-            const l = left(1);
+        it("calls the onLeft function for Left", async () => {
+            const l = left<number, string>(1);
             const result = await l.matchAsync(
                 async (n) => n * 2,
                 async (s) => parseInt(s)
@@ -188,8 +188,8 @@ describe("Either", () => {
             expect(result).toBe(2);
         });
 
-        it("calls the on_right function for Right", async () => {
-            const r = right("5");
+        it("calls the onRight function for Right", async () => {
+            const r = right<number, string>("5");
             const result = await r.matchAsync(
                 async (n) => n * 2,
                 async (s) => parseInt(s) * 2
@@ -232,11 +232,3 @@ describe("Either", () => {
         });
     });
 });
-
-function left(value: number): Either<number, string> {
-    return new Left(value);
-}
-
-function right(value: string): Either<number, string> {
-    return new Right(value);
-}

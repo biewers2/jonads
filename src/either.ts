@@ -89,20 +89,20 @@ export interface Either<L, R> {
     /**
      * Matches the jonad by calling the appropriate callback based on the value type.
      * 
-     * @param on_left If the value is a Left, this callback is called with the value.
-     * @param on_right If the value is a Right, this callback is called with the value.
+     * @param onLeft If the value is a Left, this callback is called with the value.
+     * @param onRight If the value is a Right, this callback is called with the value.
      * @returns The result of the callback that was called.
      */
-    match: <V>(on_left: (value: L) => V, on_right: (value: R) => V) => V;
+    match: <V>(onLeft: (value: L) => V, onRight: (value: R) => V) => V;
 
     /**
      * Matches the jonad by calling the appropriate callback based on the value type asynchronously.
      * 
-     * @param on_left If the value is a Left, this callback is called with the value.
-     * @param on_right If the value is a Right, this callback is called with the value.
+     * @param onLeft If the value is a Left, this callback is called with the value.
+     * @param onRight If the value is a Right, this callback is called with the value.
      * @returns The result of the callback that was called.
      */
-    matchAsync: <V>(on_left: (value: L) => Promise<V>, on_right: (value: R) => Promise<V>) => Promise<V>;
+    matchAsync: <V>(onLeft: (value: L) => Promise<V>, onRight: (value: R) => Promise<V>) => Promise<V>;
 
     /**
      * Returns the value if it is a Left, otherwise throws an error.
@@ -185,12 +185,12 @@ export class Left<L, R> implements Either<L, R> {
         return Promise.resolve(new Left(this.value));
     }
 
-    match<T>(on_left: (value: L) => T, on_right: (value: R) => T): T {
-        return on_left(this.value);
+    match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
+        return onLeft(this.value);
     }
 
-    async matchAsync<T>(on_left: (value: L) => Promise<T>, on_right: (value: R) => Promise<T>): Promise<T> {
-        return on_left(this.value);
+    async matchAsync<T>(onLeft: (value: L) => Promise<T>, onRight: (value: R) => Promise<T>): Promise<T> {
+        return onLeft(this.value);
     }
 
     getLeftOrThrow(): L {
@@ -269,12 +269,12 @@ export class Right<L, R> implements Either<L, R> {
         return mapper(this.value).then(v => new Right(v));
     }
 
-    match<T>(on_left: (value: L) => T, on_right: (value: R) => T): T {
-        return on_right(this.value);
+    match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
+        return onRight(this.value);
     }
 
-    async matchAsync<T>(on_left: (value: L) => Promise<T>, on_right: (value: R) => Promise<T>): Promise<T> {
-        return on_right(this.value);
+    async matchAsync<T>(onLeft: (value: L) => Promise<T>, onRight: (value: R) => Promise<T>): Promise<T> {
+        return onRight(this.value);
     }
 
     getLeftOrThrow(): L {

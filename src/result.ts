@@ -1,4 +1,5 @@
 import { Either, Left, Right } from "./either";
+import { Option, Some, None } from "./option";
 
 /**
  * A Result jonad, a subtype of Either.
@@ -200,3 +201,37 @@ export class Err<V, E extends Error> extends Right<V, E> implements Result<V, E>
         return `Err(${this.value})`;
     }
 }
+
+/**
+ * Result-related utilities.
+ */
+export const Result = {
+    /**
+     * Creates a new Ok instance.
+     * 
+     * @param value The value to wrap.
+     * @returns A new Ok instance.
+     */
+    ok: <V, E extends Error>(value: V): Result<V, E> => new Ok(value),
+
+    /**
+     * Creates a new Err instance.
+     * 
+     * @param value The error to wrap.
+     * @returns A new Err instance.
+     */
+    err: <V, E extends Error>(value: E): Result<V, E> => new Err(value),
+
+    /**
+     * Transposes a Result of an Option into an Option of a Result.
+     * 
+     * @param result The Result to transpose.
+     * @returns An Option with the value if the Result is an Ok, otherwise None.
+     */
+    transpose: <V, E extends Error>(result: Result<Option<V>, E>): Option<Result<V, E>> => {
+        return result.match<Option<Result<V, E>>>(
+            option => option.map(value => new Ok(value)),
+            error => new Some(new Err(error))
+        );
+    }
+};

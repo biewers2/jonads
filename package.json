@@ -1,6 +1,6 @@
 {
   "name": "jonads",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "main": "dist/jonads.js",
   "types": "dist/jonads.d.ts",
   "scripts": {
@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
   "dependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

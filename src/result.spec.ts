@@ -1,5 +1,5 @@
 import { JonadsError } from './errors';
-import { Result, Ok, Err } from './result';
+import { ok, err } from './testing';
 
 describe("Result", () => {
     describe("isOk()", () => {
@@ -38,7 +38,7 @@ describe("Result", () => {
         });
 
         it("returns the result of the fallback function for Err", () => {
-            const result = err(new Error("5"));
+            const result = err<string, Error>(new Error("5"));
             expect(result.valueOr(e => e.message)).toBe("5");
         });
     });
@@ -55,7 +55,7 @@ describe("Result", () => {
         });
 
         it("returns the result of the fallback function for Err", async () => {
-            const result = err(new Error("5"));
+            const result = err<string, Error>(new Error("5"));
             expect(await result.valueOrAsync(async e => e.message)).toBe("5");
         });
     });
@@ -69,7 +69,7 @@ describe("Result", () => {
 
         it("does not map the value for Err", () => {
             const error = new Error();
-            const result = err(error);
+            const result = err<string, Error>(error);
             const mapped = result.map(v => v.toUpperCase());
             expect(mapped.getRightOrThrow()).toBe(error);
         });
@@ -84,7 +84,7 @@ describe("Result", () => {
 
         it("does not map the value for Err", async () => {
             const error = new Error();
-            const result = err(error);
+            const result = err<string, Error>(error);
             const mapped = await result.mapAsync(async v => v.toUpperCase());
             expect(mapped.getRightOrThrow()).toBe(error);
         });
@@ -139,7 +139,7 @@ describe("Result", () => {
 
         it("returns the error for Err", () => {
             const error = new Error();
-            const result = err(error);
+            const result = err<string, Error>(error);
             const mapped = result.andThen(v => ok(v.toUpperCase()));
             expect(mapped.getRightOrThrow()).toBe(error);
         });
@@ -154,7 +154,7 @@ describe("Result", () => {
 
         it("returns the error for Err", async () => {
             const error = new Error();
-            const result = err(error);
+            const result = err<string, Error>(error);
             const mapped = await result.andThenAsync(async v => ok(v.toUpperCase()));
             expect(mapped.getRightOrThrow()).toBe(error);
         });
@@ -170,12 +170,21 @@ describe("Result", () => {
         });
 
     });
+
+    describe("ok()", () => {
+        it("creates an Ok instance", () => {
+            const result = ok("a");
+            expect(result.isOk()).toBe(true);
+            expect(result.getLeftOrThrow()).toBe("a");
+        });
+    });
+
+    describe("err()", () => {
+        it("creates an Err instance", () => {
+            const error = new Error();
+            const result = err(error);
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+    });
 });
-
-function ok(value: string): Result<string, Error> {
-    return new Ok(value);
-}
-
-function err(e: Error): Result<string, Error> {
-    return new Err(e);
-}
