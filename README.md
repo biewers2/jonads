@@ -2,6 +2,8 @@
 
 A set of monadic classes ("Jonads") and utilities for writing clean, programmatically correct code.
 
+[Jonads Documentation](https://biewers2.github.io/jonads/)
+
 ## List of Jonads
 
 Jonads are Javascript classes that implement Typescript interfaces to create monadic structures for
