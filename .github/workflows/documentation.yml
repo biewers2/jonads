@@ -38,6 +38,7 @@ jobs:
         with:
           node-version: "22.x"
           cache: "npm"
+      - run: npm ci
       - run: npm run doc
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
