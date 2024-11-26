@@ -101,48 +101,37 @@ console.log(body.valueOr({}));
 ### Option
 
 Option represents a value that may or may not exist. This is a subtype of `Either`, and also has two implicit concrete
-classes: `Ok` representing any value and `Err` representing an error that occurred during the attempt to resolve the
-value.
+classes: `Some` representing the existence of a value and `None` representing the absence of a value.
 
 #### Examples
 
-Instantiating `Result` using the provided const object:
+Instantiating `Option` using the provided const object:
 
 ```typescript
-const okish: Result<string, Error> = Result.ok("I'm ok!");
-const errish: Result<string, Error> = Result.err(new Error("I'm not ok!"));
+const something: Option<string> = Option.from("I'm ok!");
+const nothing: Option<string> = Option.none();
+// or, if you have a potentially nullable/undefined value...
+const maybe: Option<string> = Option.from(getNullableValue());
 
-console.log(okish.isOk());
+console.log(something.isSome());
 // => true
-console.log(errish.isErr());
+console.log(nothing.isNone());
 // => true
 ```
 
-Working with values using `Result`.
+Working with values using `Option`.
 
 ```typescript
-// async function safeFetch(url: string): Promise<Result<Response, HttpError>>
+const stack: string[] = ["a"];
 
-// When the fetch is successful...
-
-const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
-console.log(result.isOk());
+let nextValue: Option<string> = Option.from(stack.pop());
+console.log(nextValue.isSome());
 // => true
 
-const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
-console.log(body.valueOr({}));
-// => { data: "..." }
-
-// ...when the fetch is not successful...
-
-const result: Result<Response, HttpError> = await safeFetch("https://example.com/api/data");
-console.log(result.isErr());
-
-const body: Result<object, HttpError> = await result.mapAsync(async response => await response.json());
-console.log(body.valueOr({}));
-// => {}
+nextValue = Option.from(stack.pop());
+console.log(nextValue.isNone());
+// => true
 ```
-
 
 ## Working with Jonads
 

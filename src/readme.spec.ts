@@ -1,4 +1,4 @@
-import { Either, Result, doing, tryingAsync } from "./jonads";
+import { Either, Result, Option, doing, tryingAsync } from "./jonads";
 
 describe("README", () => {
     describe("Either examples", () => {
@@ -57,6 +57,26 @@ describe("README", () => {
 
             body = await result.mapAsync(async response => await response.json());
             expect(body.valueOr({})).toEqual({});
+        });
+    });
+
+    describe("Option examples", () => {
+        test("instantiating 'Option'", () => {
+            const something: Option<string> = Option.from("I'm here!");
+            const nothing: Option<string> = Option.none();
+
+            expect(something.isSome()).toBe(true);
+            expect(nothing.isNone()).toBe(true);
+        });
+
+        test("working with values using 'Option'", () => {
+            const stack: string[] = ["a"];
+
+            let nextValue: Option<string> = Option.from(stack.pop());
+            expect(nextValue.isSome()).toBe(true);
+
+            nextValue = Option.from(stack.pop());
+            expect(nextValue.isNone()).toBe(true);
         });
     });
 
