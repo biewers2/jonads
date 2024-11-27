@@ -117,6 +117,14 @@ describe("tryCatchingAsync", () => {
         expect(result.getLeftOrThrow()).toBe(6);
     });
 
+    it("returns an Ok when the block is a Promise and nothing is thrown", async () => {
+        class CustomError extends Error {}
+
+        const result = await tryCatchingAsync([CustomError], Promise.resolve(3));
+
+        expect(result.getLeftOrThrow()).toBe(3);
+    });
+
     it("returns an Err from the block when the specified error is thrown", async () => {
         class OneError extends Error {}
         class TwoError extends Error {}
