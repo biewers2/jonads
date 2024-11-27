@@ -197,4 +197,14 @@ export const Either = {
      * @returns A new Right instance.
      */
     right: <L, R>(value: R): Either<L, R> => new Right(value),
+
+    /**
+     * Checks if the provided value is an instance of the Either jonad.
+     * 
+     * @param value The value to check. 
+     * @returns true if the value is an instance of Either, false otherwise.
+     */
+    isInstance: <L, R>(value: unknown): value is Either<L, R> => {
+        return value instanceof Left || value instanceof Right;
+    },
 };

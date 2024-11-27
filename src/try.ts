@@ -1,3 +1,4 @@
+import { isFunction } from "./guards";
 import { Result } from "./result/result";
 
 /**
@@ -25,9 +26,13 @@ export function trying<T, E extends Error>(block: () => T): Result<T, E> {
  * @param block The block of code to execute.
  * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
  */
-export async function tryingAsync<T, E extends Error>(block: () => Promise<T>): Promise<Result<T, E>> {
+export async function tryingAsync<T, E extends Error>(block: Promise<T> | (() => Promise<T>)): Promise<Result<T, E>> {
     try {
-        return Result.ok(await block());
+        if (isFunction(block)) {
+            return Result.ok(await block());
+        } else {
+            return Result.ok(await block);
+        }
     } catch (e) {
         return Result.err(e);
     }
@@ -63,13 +68,17 @@ export function tryCatching<T, E extends Error>(errors: ErrorClass[], block: () 
  * @param block The block of code to execute.
  * @returns The result of the block wrapped in an `Ok`, or an `Err` containing any error thrown by the block.
  */
-export async function tryCatchingAsync<T, E extends Error>(errors: ErrorClass[], block: () => Promise<T>): Promise<Result<T, E>> {
+export async function tryCatchingAsync<T, E extends Error>(errors: ErrorClass[], block: Promise<T> | (() => Promise<T>)): Promise<Result<T, E>> {
     if (errors.length === 0) {
         return tryingAsync(block);
     }
 
     try {
-        return Result.ok(await block());
+        if (isFunction(block)) {
+            return Result.ok(await block());
+        } else {
+            return Result.ok(await block);
+        }
     } catch (e) {
         return handleTryError(e, errors);
     }

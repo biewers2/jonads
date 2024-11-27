@@ -1,6 +1,6 @@
 import { JonadsError } from "./errors";
-import { isPromise } from "./guards";
 import { Result } from "./result/result";
+import { tryCatching, tryCatchingAsync } from "./try";
 
 /**
  * An error that is thrown when a failure is propagated from a result in a do block.
@@ -47,11 +47,13 @@ function bindResult<T, E extends Error>(result: Result<T, E>): T {
  * 
  * @see bindResult
  */
-async function bindPromisedResult<T, E extends Error>(result: Result<T, E> | Promise<Result<T, E>>): Promise<T> {
-    if (isPromise(result)) {
-        return bindResult(await result);
+async function bindPromisedResult<T, E extends Error>(result: Result<T, E> | Promise<T | Result<T, E>>): Promise<T> {
+    const resolvedValue = await Promise.resolve(result);
+
+    if (Result.isInstance(resolvedValue)) {
+        return bindResult(resolvedValue);
     } else {
-        return bindResult(result);
+        return bindResult(Result.ok(resolvedValue));
     }
 }
 
@@ -80,12 +82,13 @@ async function bindPromisedResult<T, E extends Error>(result: Result<T, E> | Pro
  * // => Ok("Alice")
  */
 export function doing<T, E extends Error>(block: (bind: typeof bindResult) => T, catchall = true): Result<T, E> {
-    try {
-        const output = block(bindResult);
-        return Result.ok(output);
-    } catch (e) {
-        return handleDoError(e, catchall);
+    const catchingErrors = [];
+    if (!catchall) {
+        catchingErrors.push(DoPropagateError);
     }
+
+    const result = tryCatching(catchingErrors, () => block(bindResult));
+    return handleDoingResult(result);
 }
 
 /**
@@ -114,20 +117,25 @@ export function doing<T, E extends Error>(block: (bind: typeof bindResult) => T,
  * // => Ok("Alice")* 
  */
 export async function doingAsync<T, E extends Error>(block: (bind: typeof bindPromisedResult) => Promise<T>, catchall = true): Promise<Result<T, E>> {
-    try {
-        const output = await block(bindPromisedResult);
-        return Result.ok(output);
-    } catch (e) {
-        return handleDoError(e, catchall);
+    const catchingErrors = [];
+    if (!catchall) {
+        catchingErrors.push(DoPropagateError);
     }
+
+    const result = await tryCatchingAsync(catchingErrors, async () => await block(bindPromisedResult));
+    return handleDoingResult(result);
 }
 
-function handleDoError<E extends Error>(e: E, catchall: boolean): Result<never, E> {
-    if (e instanceof DoPropagateError) {
-        return Result.err(e.getError());
-    } else if (catchall) {
-        return Result.err(e);
-    } else {
-        throw e;
-    }
+function handleDoingResult<T, E extends Error, F extends Error>(result: Result<T, E>): Result<T, F> {
+    return result.match(
+        value => Result.ok(value),
+        error => {
+            if (error instanceof DoPropagateError) {
+                // Extract the cause from the propagation error.
+                return Result.err(error.getError());
+            } else {
+                return Result.err(error);
+            }
+        }
+    );
 }

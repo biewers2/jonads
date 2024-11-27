@@ -1,5 +1,5 @@
-import { Result } from "./result";
-import { JonadsError } from "../errors";
+import { Result } from "../../../src/result/result";
+import { JonadsError } from "../../../src/errors";
 
 describe("Result", () => {
     describe("isOk()", () => {

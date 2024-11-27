@@ -1,5 +1,5 @@
-import { Option } from "./option";
-import { Result } from "../result/result";
+import { Option } from "../../../src/option/option";
+import { Result } from "../../../src/result/result";
 
 describe("Option", () => {
     describe("from()", () => {
@@ -51,6 +51,23 @@ describe("Option", () => {
 
             expect(transposed.isOk()).toBe(true);
             expect(transposed.getLeftOrThrow().isNone()).toBe(true);
+        });
+    });
+
+    describe("isInstance()", () => {
+        it("returns true for a Some instance", () => {
+            const option = Option.from(1);
+            expect(Option.isInstance(option)).toBe(true);
+        });
+
+        it("returns true for a None instance", () => {
+            const option = Option.none();
+            expect(Option.isInstance(option)).toBe(true);
+        });
+
+        it("returns false for a non-Option instance", () => {
+            const option = { value: 1 };
+            expect(Option.isInstance(option)).toBe(false);
         });
     });
 });

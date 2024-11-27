@@ -125,4 +125,14 @@ export const Option = {
             () => Result.ok(Option.none())
         )
     },
+
+    /**
+     * Checks if a value is an Option jonad.
+     * 
+     * @param value The value to check.
+     * @returns true if the value is an Option, false otherwise
+     */
+    isInstance: <T>(value: unknown): value is Option<T> => {
+        return value instanceof Some || value instanceof None;
+    }
 }

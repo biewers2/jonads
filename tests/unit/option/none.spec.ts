@@ -1,4 +1,4 @@
-import { Option } from "./option";
+import { Option } from "../../../src/option/option";
 
 describe("None", () => {
     describe("isSome()", () => {

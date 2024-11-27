@@ -119,5 +119,15 @@ export const Result = {
             option => option.map(value => Result.ok(value)),
             error => Option.from(Result.err(error))
         );
-    }
+    },
+
+    /**
+     * Checks if the value is an instance of the Result jonad.
+     * 
+     * @param value The value to check.
+     * @returns true if the value is an instance of Result, false otherwise.
+     */
+    isInstance: <V, E extends Error>(value: unknown): value is Result<V, E> => {
+        return value instanceof Ok || value instanceof Err;
+    },
 };

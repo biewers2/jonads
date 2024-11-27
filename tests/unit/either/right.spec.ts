@@ -1,5 +1,5 @@
-import { GetValueError } from "../errors";
-import { Either } from "./either";
+import { GetValueError } from "../../../src/errors";
+import { Either } from "../../../src/either/either";
 
 describe("Right", () => {
     describe("isLeft()", () => {
