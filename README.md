@@ -2,9 +2,9 @@
 
 A set of monadic classes ("Jonads") and utilities for writing clean, programmatically correct code.
 
-[Jonads Documentation](https://biewers2.github.io/jonads/)
-[Jonads Repository](https://github.com/biewers2/jonads)
-[NPM Package](https://www.npmjs.com/package/jonads)
+* [Jonads Documentation](https://biewers2.github.io/jonads/)
+* [Jonads Repository](https://github.com/biewers2/jonads)
+* [NPM Package](https://www.npmjs.com/package/jonads)
 
 ## List of Jonads
 
