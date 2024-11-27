@@ -86,6 +86,28 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * @returns A new Result with the mapped value if it is an Ok, otherwise the value as-is.
      */
     andThenAsync: <T>(mapper: (value: V) => Promise<Result<T, E>>) => Promise<Result<T, E>>;
+
+    /**
+     * Maps the Result into an Option.
+     * 
+     * If the Result is an `Ok` and the value _is not_ null or undefined, then it will be `Some` with that value.
+     * If the Result is an `Ok` and the value _is_ null or undefined, then it will be `None`.
+     * If the Result is an `Err`, then it will be `None` with the error discarded.
+     * 
+     * @returns `Some` if the value is `Ok` and present, otherwise `None`.
+     */
+    someOrNone(): Option<V>;
+
+    /**
+     * Maps the Result so the `Ok` value is wrapped in an Option based on its presence.
+     * 
+     * If the Result is an `Ok` and the value _is not_ null or undefined, then the inner value will become `Some`.
+     * If the Result is an `Ok` and the value _is_ null or undefined, then the inner value will become `None`.
+     * If the Result is an `Err`, then nothing will happen.
+     * 
+     * @returns A new Result with the `Ok` value wrapped in an Option based on its presence.
+     */
+    asNullable(): Result<Option<V>, E>;
 }
 
 /**

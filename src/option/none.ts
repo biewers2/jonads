@@ -1,6 +1,7 @@
 import { Option } from "./option";
 import { Right } from "../either/right";
 import { isFunction } from "../guards";
+import { Result } from "../jonads";
 
 export class None<T> extends Right<T, null> implements Option<T> {
     constructor() {
@@ -45,6 +46,23 @@ export class None<T> extends Right<T, null> implements Option<T> {
 
     async andThenAsync<U>(mapper: (value: T) => Promise<Option<U>>): Promise<Option<U>> {
         return new None();
+    }
+
+    okOr(error: Error | (() => Error)): Result<T, Error> {
+        if (isFunction(error)) {
+            return Result.err(error());
+        } else {
+            return Result.err(error);
+        }
+    }
+
+    async okOrAsync(error: Error | Promise<Error> | (() => Promise<Error>)): Promise<Result<T, Error>> {
+        if (isFunction(error)) {
+            return Result.err(await error());
+        } else {
+            const resolvedError = await Promise.resolve(error);
+            return Result.err(resolvedError);
+        }
     }
 
     toString(): string {

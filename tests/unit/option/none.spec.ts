@@ -68,6 +68,50 @@ describe("None", () => {
         });
     });
 
+    describe("okOr()", () => {
+        it("returns an Err", () => {
+            const option = Option.none();
+            const error = new Error();
+            const result = option.okOr(error);
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+
+        it("returns an Err from a callback", () => {
+            const option = Option.none();
+            const error = new Error();
+            const result = option.okOr(() => error);
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+    });
+
+    describe("okOrAsync()", () => {
+        it("returns an Err", async () => {
+            const option = Option.none();
+            const error = new Error();
+            const result = await option.okOrAsync(error);
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+
+        it("returns an Err from a Promise", async () => {
+            const option = Option.none();
+            const error = new Error();
+            const result = await option.okOrAsync(Promise.resolve(error));
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+
+        it("returns an Err from an async callback", async () => {
+            const option = Option.none();
+            const error = new Error();
+            const result = await option.okOrAsync(async () => error);
+            expect(result.isErr()).toBe(true);
+            expect(result.getRightOrThrow()).toBe(error);
+        });
+    });
+
     describe("toString()", () => {
         it("returns 'None' for None", () => {
             const option = Option.none();
@@ -75,5 +119,3 @@ describe("None", () => {
         });
     });
 });
-
-

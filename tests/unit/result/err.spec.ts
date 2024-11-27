@@ -103,6 +103,22 @@ describe("Result", () => {
         });
     });
 
+    describe("someOrNone()", () => {
+        it("returns None", () => {
+            const result = Result.err(new Error());
+            const option = result.someOrNone();
+            expect(option.isNone()).toBe(true);
+        });
+    });
+
+    describe("asNullable()", () => {
+        it("returns unchanged", () => {
+            const result = Result.err(new Error());
+            const newResult = result.asNullable();
+            expect(newResult.isErr()).toBe(true);
+        });
+    });
+
     describe("toString()", () => {
         it("converts to a string", () => {
             const r = Result.err(new Error());

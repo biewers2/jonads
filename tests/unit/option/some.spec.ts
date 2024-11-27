@@ -58,6 +58,22 @@ describe("Some", () => {
         });
     });
 
+    describe("okOr()", () => {
+        it("returns Ok", () => {
+            const option = Option.from(1);
+            const result = option.okOr(new Error("error"));
+            expect(result.isOk()).toBe(true);
+        });
+    });
+
+    describe("okOrAsync()", () => {
+        it("returns Ok", async () => {
+            const option = Option.from(1);
+            const result = await option.okOrAsync(new Error("error"));
+            expect(result.isOk()).toBe(true);
+        });
+    });
+
     describe("toString()", () => {
         it("returns 'Some(value)'", () => {
             const option = Option.from(1);

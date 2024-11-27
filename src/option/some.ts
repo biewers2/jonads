@@ -1,5 +1,6 @@
 import { Option } from "./option";
 import { Left } from "../either/left";
+import { Result } from "../jonads";
 
 export class Some<T> extends Left<T, null> implements Option<T> {
     constructor(value: T) {
@@ -37,6 +38,14 @@ export class Some<T> extends Left<T, null> implements Option<T> {
     async andThenAsync<U>(mapper: (value: T) => Promise<Option<U>>): Promise<Option<U>> {
         return mapper(this.value);
     }
+
+    okOr(error: Error | (() => Error)): Result<T, Error> {
+        return Result.ok(this.value);
+    }
+
+    async okOrAsync(error: Error | (() => Promise<Error>)): Promise<Result<T, Error>> {
+        return Result.ok(this.value);
+    }   
 
     toString(): string {
         return `Some(${this.value})`;

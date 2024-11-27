@@ -71,6 +71,26 @@ export interface Option<T> extends Either<T, null> {
      * @returns A new Option with the mapped value if it is Some, otherwise the value as-is.
      */
     andThenAsync: <U>(mapper: (value: T) => Promise<Option<U>>) => Promise<Option<U>>;
+
+    /**
+     * Maps the Option to a Result.
+     * 
+     * If the Option is Some, the value will be wrapped in an Ok. If the Option is None, the provided error will be returned.
+     * 
+     * @param error The error to return if the Option is None.
+     * @returns A Result of the Option.
+     */
+    okOr(error: Error | (() => Error)): Result<T, Error>;
+
+    /**
+     * Maps the Option to a Result, but asynchronously.
+     * 
+     * If the Option is Some, the value will be wrapped in an Ok. If the Option is None, the provided error will be returned.
+     * 
+     * @param error The error to return if the Option is None.
+     * @returns A Result of the Option.
+     */
+    okOrAsync(error: Error | Promise<Error> | (() => Promise<Error>)): Promise<Result<T, Error>>;
 }
 
 /**

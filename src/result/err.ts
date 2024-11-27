@@ -1,5 +1,6 @@
 import { Result } from './result';
 import { Right } from '../either/right';
+import { Option } from '../jonads';
 
 /**
  * A Result jonad that represents an error.
@@ -51,6 +52,14 @@ export class Err<V, E extends Error> extends Right<V, E> implements Result<V, E>
     }
 
     async andThenAsync<T>(mapper: (value: V) => Promise<Result<T, E>>): Promise<Result<T, E>> {
+        return new Err(this.value);
+    }
+
+    someOrNone(): Option<V> {
+        return Option.none();
+    }
+
+    asNullable(): Result<Option<V>, E> {
         return new Err(this.value);
     }
 
