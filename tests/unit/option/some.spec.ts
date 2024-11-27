@@ -1,4 +1,4 @@
-import { Option } from "./option";
+import { Option } from "../../../src/option/option";
 
 describe("Some", () => {
     describe("isSome()", () => {
@@ -55,6 +55,22 @@ describe("Some", () => {
             const option = Option.from(1);
             const newOption = await option.andThenAsync(async n => Option.from(n + 1));
             expect(newOption.getLeftOrThrow()).toBe(2);
+        });
+    });
+
+    describe("okOr()", () => {
+        it("returns Ok", () => {
+            const option = Option.from(1);
+            const result = option.okOr(new Error("error"));
+            expect(result.isOk()).toBe(true);
+        });
+    });
+
+    describe("okOrAsync()", () => {
+        it("returns Ok", async () => {
+            const option = Option.from(1);
+            const result = await option.okOrAsync(new Error("error"));
+            expect(result.isOk()).toBe(true);
         });
     });
 

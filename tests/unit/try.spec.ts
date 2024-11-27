@@ -1,4 +1,4 @@
-import { trying, tryingAsync, tryCatching, tryCatchingAsync } from "./try";
+import { trying, tryingAsync, tryCatching, tryCatchingAsync } from "../../src/try";
 
 describe("trying", () => {
     it("returns an Ok from the block when nothing is thrown", () => {
@@ -34,6 +34,12 @@ describe("tryingAsync", () => {
         });
 
         expect(result.getLeftOrThrow()).toBe(6);
+    });
+
+    it("returns an Ok when the block is a Promise and nothing is thrown", async () => {
+        const result = await tryingAsync(Promise.resolve(3));
+
+        expect(result.getLeftOrThrow()).toBe(3);
     });
 
     it("returns an Err from the block when an error is thrown", async () => {
@@ -109,6 +115,14 @@ describe("tryCatchingAsync", () => {
         });
 
         expect(result.getLeftOrThrow()).toBe(6);
+    });
+
+    it("returns an Ok when the block is a Promise and nothing is thrown", async () => {
+        class CustomError extends Error {}
+
+        const result = await tryCatchingAsync([CustomError], Promise.resolve(3));
+
+        expect(result.getLeftOrThrow()).toBe(3);
     });
 
     it("returns an Err from the block when the specified error is thrown", async () => {

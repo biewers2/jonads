@@ -1,4 +1,4 @@
-import { Result } from "./result";
+import { Result } from "../../../src/result/result";
 
 describe("Result", () => {
     describe("isOk()", () => {
@@ -100,6 +100,22 @@ describe("Result", () => {
             const result = Result.err<string, Error>(error);
             const mapped = await result.andThenAsync(async v => Result.ok(v.toUpperCase()));
             expect(mapped.getRightOrThrow()).toBe(error);
+        });
+    });
+
+    describe("someOrNone()", () => {
+        it("returns None", () => {
+            const result = Result.err(new Error());
+            const option = result.someOrNone();
+            expect(option.isNone()).toBe(true);
+        });
+    });
+
+    describe("asNullable()", () => {
+        it("returns unchanged", () => {
+            const result = Result.err(new Error());
+            const newResult = result.asNullable();
+            expect(newResult.isErr()).toBe(true);
         });
     });
 

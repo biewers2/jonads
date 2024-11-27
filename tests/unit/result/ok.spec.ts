@@ -1,5 +1,6 @@
-import { Result } from "./result";
-import { JonadsError } from "../errors";
+import { Result } from "../../../src/result/result";
+import { JonadsError } from "../../../src/errors";
+import { Option } from "../../../src/option/option";
 
 describe("Result", () => {
     describe("isOk()", () => {
@@ -75,6 +76,37 @@ describe("Result", () => {
             const result = Result.ok("a");
             const mapped = await result.andThenAsync(async v => Result.ok(v.toUpperCase()));
             expect(mapped.valueOr("b")).toBe("A");
+        });
+    });
+
+    describe("someOrNone()", () => {
+        it("returns Some(value) if the value is present", () => {
+            const result = Result.ok("a");
+            const option = result.someOrNone();
+
+            expect(option.isSome()).toBe(true);
+        });
+
+        it("returns None if the value is not present", () => {
+            const result = Result.ok(null);
+            const option = result.someOrNone();
+            expect(option.isNone()).toBe(true);
+        });
+    });
+
+    describe("asNullable()", () => {
+        it("maps the value to Some(value) if it's present", () => {
+            const result = Result.ok("a");
+            const newResult = result.asNullable();
+            expect(newResult.isOk()).toBe(true);
+            expect(newResult.getLeftOrThrow()).toEqual(Option.from("a"));
+        });
+
+        it("maps the value to None if it's not present", () => {
+            const result = Result.ok(null);
+            const newResult = result.asNullable();
+            expect(newResult.isOk()).toBe(true);
+            expect(newResult.getLeftOrThrow()).toEqual(Option.none());
         });
     });
 

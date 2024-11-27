@@ -1,5 +1,5 @@
-import { Option } from '../option/option';
-import { Result } from '../result/result';
+import { Option } from '../../../src/option/option';
+import { Result } from '../../../src/result/result';
 
 describe("Result", () => {
     describe("ok()", () => {
@@ -45,6 +45,22 @@ describe("Result", () => {
             const innerResult = transposed.getLeftOrThrow();
             expect(innerResult.isErr()).toBe(true);
             expect(innerResult.getRightOrThrow()).toBeInstanceOf(Error);
+        });
+    });
+
+    describe("isInstance()", () => {
+        it("returns true for an Ok instance", () => {
+            const result = Result.ok(1);
+            expect(Result.isInstance(result)).toBe(true);
+        });
+
+        it("returns true for an Err instance", () => {
+            const result = Result.err(new Error("oops"));
+            expect(Result.isInstance(result)).toBe(true);
+        });
+
+        it("returns false for a non-Result instance", () => {
+            expect(Result.isInstance("foo")).toBe(false);
         });
     });
 });

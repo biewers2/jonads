@@ -1,4 +1,4 @@
-import { Either, Result, Option, doing, tryingAsync } from "./jonads";
+import { Either, Result, Option, doing, tryingAsync } from "../../src/jonads";
 
 describe("README", () => {
     describe("Either examples", () => {
