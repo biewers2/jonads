@@ -1,0 +1,6 @@
+{
+    "name": "@biewers2/jonads",
+    "version": "1.1.1",
+    "license": "MIT",
+    "exports": "./src/jonads.ts"
+}
