@@ -1,6 +1,7 @@
 import { Either } from "./either";
 import { isFunction } from "../guards";
 import { GetValueError } from "../errors";
+import { AsyncConsumer, AsyncMapper, Consumer, Mapper } from "../types";
 
 /**
  * An Either jonad with a Right value.
@@ -25,7 +26,7 @@ export class Right<L, R> implements Either<L, R> {
         return true;
     }
 
-    leftOr(fallback: L | ((right: R) => L)): L {
+    leftOr(fallback: L | Mapper<R, L>): L {
         if (isFunction(fallback)) {
             return fallback(this.value);
         } else {
@@ -33,61 +34,61 @@ export class Right<L, R> implements Either<L, R> {
         }
     }
 
-    async leftOrAsync(fallback: L | ((right: R) => Promise<L>)): Promise<L> {
+    async leftOrAsync(fallback: L | Promise<L> | AsyncMapper<R, L>): Promise<L> {
         if (isFunction(fallback)) {
             return await fallback(this.value);
         } else {
-            return fallback;
+            return await Promise.resolve(fallback);
         }
     }
 
-    rightOr(fallback: R | ((left: L) => R)): R {
+    rightOr(fallback: R | Mapper<L, R>): R {
         return this.value;
     }
 
-    async rightOrAsync(fallback: R | ((left: L) => Promise<R>)): Promise<R> {
+    async rightOrAsync(fallback: R | Promise<R> | AsyncMapper<L, R>): Promise<R> {
         return this.value;
     }
 
-    mapLeft<T>(mapper: (value: L) => T): Either<T, R> {
+    mapLeft<T>(mapper: Mapper<L, T>): Either<T, R> {
         return new Right(this.value);
     }
 
-    async mapLeftAsync<V>(mapper: (value: L) => Promise<V>): Promise<Either<V, R>> {
+    async mapLeftAsync<V>(mapper: AsyncMapper<L, V>): Promise<Either<V, R>> {
         return Promise.resolve(new Right(this.value));
     }
 
-    mapRight<T>(mapper: (value: R) => T): Either<L, T> {
+    mapRight<T>(mapper: Mapper<R, T>): Either<L, T> {
         return new Right(mapper(this.value));
     }
 
-    async mapRightAsync<V>(mapper: (value: R) => Promise<V>): Promise<Either<L, V>> {
+    async mapRightAsync<V>(mapper: AsyncMapper<R, V>): Promise<Either<L, V>> {
         return mapper(this.value).then(v => new Right(v));
     }
 
-    tapLeft(callback: (value: L) => void): Either<L, R> {
+    tapLeft(callback: Consumer<L>): Either<L, R> {
         return this;
     }
 
-    async tapLeftAsync(callback: (value: L) => Promise<void>): Promise<Either<L, R>> {
+    async tapLeftAsync(callback: AsyncConsumer<L>): Promise<Either<L, R>> {
         return this;
     }
 
-    tapRight(callback: (value: R) => void): Either<L, R> {
+    tapRight(callback: Consumer<R>): Either<L, R> {
         callback(this.value);
         return this;
     }
 
-    async tapRightAsync(callback: (value: R) => Promise<void>): Promise<Either<L, R>> {
+    async tapRightAsync(callback: AsyncConsumer<R>): Promise<Either<L, R>> {
         await callback(this.value);
         return this;
     }
 
-    match<T>(onLeft: (value: L) => T, onRight: (value: R) => T): T {
+    match<T>(onLeft: Mapper<L, T>, onRight: Mapper<R, T>): T {
         return onRight(this.value);
     }
 
-    async matchAsync<T>(onLeft: (value: L) => Promise<T>, onRight: (value: R) => Promise<T>): Promise<T> {
+    async matchAsync<T>(onLeft: AsyncMapper<L, T>, onRight: AsyncMapper<R, T>): Promise<T> {
         return onRight(this.value);
     }
 

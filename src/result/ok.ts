@@ -1,6 +1,6 @@
 import { Result } from "./result";
 import { Left } from "../either/left";
-import { Option } from "../jonads";
+import { AsyncMapper, Mapper, Option } from "../jonads";
 
 /**
  * A Result jonad that represents a successful value.
@@ -23,35 +23,35 @@ export class Ok<V, E extends Error> extends Left<V, E> implements Result<V, E> {
         return this.isRight();
     }
 
-    valueOr(fallback: V | ((error: E) => V)): V {
+    valueOr(fallback: V | Mapper<E, V>): V {
         return this.leftOr(fallback);
     }
 
-    async valueOrAsync(fallback: V | ((error: E) => Promise<V>)): Promise<V> {
+    async valueOrAsync(fallback: V | Promise<V> | AsyncMapper<E, V>): Promise<V> {
         return this.leftOrAsync(fallback);
     }
 
-    map<T>(mapper: (value: V) => T): Result<T, E> {
+    map<T>(mapper: Mapper<V, T>): Result<T, E> {
         return new Ok(mapper(this.value));
     }
 
-    async mapAsync<T>(mapper: (value: V) => Promise<T>): Promise<Result<T, E>> {
+    async mapAsync<T>(mapper: AsyncMapper<V, T>): Promise<Result<T, E>> {
         return new Ok(await mapper(this.value));
     }
 
-    mapErr<T extends Error>(mapper: (error: E) => T): Result<V, T> {
+    mapErr<T extends Error>(mapper: Mapper<E, T>): Result<V, T> {
         return new Ok(this.value);
     }
 
-    async mapErrAsync<T extends Error>(mapper: (error: E) => Promise<T>): Promise<Result<V, T>> {
+    async mapErrAsync<T extends Error>(mapper: AsyncMapper<E, T>): Promise<Result<V, T>> {
         return new Ok(this.value);
     }
 
-    andThen<T>(mapper: (value: V) => Result<T, E>): Result<T, E> {
+    andThen<T>(mapper: Mapper<V, Result<T, E>>): Result<T, E> {
         return mapper(this.value);
     }
 
-    async andThenAsync<T>(mapper: (value: V) => Promise<Result<T, E>>): Promise<Result<T, E>> {
+    async andThenAsync<T>(mapper: AsyncMapper<V, Result<T, E>>): Promise<Result<T, E>> {
         return mapper(this.value);
     }
 

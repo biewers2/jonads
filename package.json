@@ -1,6 +1,21 @@
 {
   "name": "jonads",
-  "version": "1.1.1",
+  "version": "1.1.2",
+  "author": "Jake Biewer",
+  "license": "MIT",
+  "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
+  "keywords": [
+    "monads",
+    "functional programming",
+    "typescript",
+    "fp",
+    "safety",
+    "clean code",
+    "result",
+    "option",
+    "maybe",
+    "either"
+  ],
   "main": "dist/jonads.js",
   "types": "dist/jonads.d.ts",
   "scripts": {
@@ -8,15 +23,6 @@
     "test": "jest",
     "doc": "npx typedoc src/jonads.ts"
   },
-  "keywords": [
-    "monads",
-    "functional programming",
-    "typescript",
-    "fp"
-  ],
-  "author": "",
-  "license": "ISC",
-  "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
   "dependencies": {
     "typescript": "^5"
   },

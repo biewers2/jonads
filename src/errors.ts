@@ -9,14 +9,20 @@ export class JonadsError extends Error {
 }
 
 /**
- * Error thrown when attempting to unwrap a missing value on either side of an Either jonad.
+ * Runtime error thrown when attempting to get/unwrap the wrong side of an Either jonad.
+ * 
+ * @example
+ * const maybeNumber = Option.from(null);
+ * maybeNumber.getLeftOrThrow();
+ * // => GetValueErorr: Attempted to get the left value, but it was missing
  */
 export class GetValueError extends JonadsError {
     /**
      * Constructs a new GetValueError.
+     * 
      * @param side The side of the Either jonad that was missing a value.
      */
     constructor(side: "left" | "right") {
-        super("Attempted to unwrap a missing " + side + " value");
+        super("Attempted to get the " + side + " value, but it was missing");
     }
 }
