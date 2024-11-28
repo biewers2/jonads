@@ -353,7 +353,7 @@ export interface Either<L, R> {
 /**
  * Either-related utilities.
  */
-export const Either: object = {
+export const Either = {
     /**
      * Creates a new Left instance.
      * 
@@ -366,7 +366,7 @@ export const Either: object = {
      * value.isLeft(); // => true
      * ```
      */
-    left<L, R>(value: L): Either<L, R> {
+    left: <L, R>(value: L): Either<L, R> => {
         return new Left(value);
     },
 
@@ -382,7 +382,7 @@ export const Either: object = {
      * value.isRight(); // => true
      * ```
      */
-    right<L, R>(value: R): Either<L, R> {
+    right: <L, R>(value: R): Either<L, R> => {
         return new Right(value);
     },
 
@@ -410,7 +410,7 @@ export const Either: object = {
      * Either.isInstance(value); // => false
      * ```
      */
-    isInstance<L, R>(value: unknown): value is Either<L, R> {
+    isInstance: <L, R>(value: unknown): value is Either<L, R> => {
         return value instanceof Left || value instanceof Right;
     },
 };

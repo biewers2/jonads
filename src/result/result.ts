@@ -114,14 +114,14 @@ export interface Result<V, E extends Error> extends Either<V, E> {
 /**
  * Result-related utilities.
  */
-export const Result: object = {
+export const Result = {
     /**
      * Creates a new Ok instance.
      * 
      * @param value The value to wrap.
      * @returns A new Ok instance.
      */
-    ok<V, E extends Error>(value: V): Result<V, E> {
+    ok: <V, E extends Error>(value: V): Result<V, E> => {
         return new Ok(value);
     },
 
@@ -131,7 +131,7 @@ export const Result: object = {
      * @param value The error to wrap.
      * @returns A new Err instance.
      */
-    err<V, E extends Error>(value: E): Result<V, E> {
+    err: <V, E extends Error>(value: E): Result<V, E> => {
         return new Err(value);
     },
 
@@ -141,7 +141,7 @@ export const Result: object = {
      * @param result The Result to transpose.
      * @returns An Option with the value if the Result is an Ok, otherwise None.
      */
-    transpose<V, E extends Error>(result: Result<Option<V>, E>): Option<Result<V, E>> {
+    transpose: <V, E extends Error>(result: Result<Option<V>, E>): Option<Result<V, E>> => {
         return result.match<Option<Result<V, E>>>(
             option => option.map(value => Result.ok(value)),
             error => Option.from(Result.err(error))
@@ -154,7 +154,7 @@ export const Result: object = {
      * @param value The value to check.
      * @returns true if the value is an instance of Result, false otherwise.
      */
-    isInstance<V, E extends Error>(value: unknown): value is Result<V, E> {
+    isInstance: <V, E extends Error>(value: unknown): value is Result<V, E> => {
         return value instanceof Ok || value instanceof Err;
     },
 };

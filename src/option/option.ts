@@ -98,14 +98,14 @@ export interface Option<T> extends Either<T, null | undefined> {
 /**
  * Option-related utilities.
  */
-export const Option: object = {
+export const Option = {
     /**
      * Creates a new Option from a nullable, potentially-undefined value.
      * 
      * @param value The value to wrap in an Option.
      * @returns A new Option with the left-value `Some` if the value is not `null` or `undefined`, otherwise `None`.
      */
-    from<T>(value: T | null | undefined): Option<T> {
+    from: <T>(value: T | null | undefined): Option<T> => {
         if (isNullish(value)) {
             return new None(value);
         } else {
@@ -118,7 +118,7 @@ export const Option: object = {
      * 
      * @returns A new Option with the right-value `None`.
      */
-    none<T>(): Option<T> {
+    none: <T>(): Option<T> => {
         return new None();
     },
 
@@ -141,7 +141,7 @@ export const Option: object = {
      * const result_option = Option.transpose(option_result);           // Err(ParseIntError)
      * ```
      */
-    transpose<T, E extends Error>(option: Option<Result<T, E>>): Result<Option<T>, E> {
+    transpose: <T, E extends Error>(option: Option<Result<T, E>>): Result<Option<T>, E> => {
         return option.match<Result<Option<T>, E>>(
             some_result => some_result.map(value => new Some(value)),
             () => Result.ok(Option.none())
@@ -154,7 +154,7 @@ export const Option: object = {
      * @param value The value to check.
      * @returns true if the value is an Option, false otherwise
      */
-    isInstance<T>(value: unknown): value is Option<T> {
+    isInstance: <T>(value: unknown): value is Option<T> => {
         return value instanceof Some || value instanceof None;
     },
 }
