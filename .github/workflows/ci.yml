@@ -1,11 +1,11 @@
-name: Build, Test and Dry Run Publish
+name: CI
 
 on:
   pull_request:
     branches: [ "main" ]
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
 
     steps:
