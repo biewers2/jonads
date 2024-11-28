@@ -98,7 +98,7 @@ export interface Option<T> extends Either<T, null | undefined> {
 /**
  * Option-related utilities.
  */
-export const Option = {
+export const Option: object = {
     /**
      * Creates a new Option from a nullable, potentially-undefined value.
      * 

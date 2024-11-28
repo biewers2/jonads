@@ -114,7 +114,7 @@ export interface Result<V, E extends Error> extends Either<V, E> {
 /**
  * Result-related utilities.
  */
-export const Result = {
+export const Result: object = {
     /**
      * Creates a new Ok instance.
      * 

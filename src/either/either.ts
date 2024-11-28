@@ -353,7 +353,7 @@ export interface Either<L, R> {
 /**
  * Either-related utilities.
  */
-export const Either = {
+export const Either: object = {
     /**
      * Creates a new Left instance.
      * 
