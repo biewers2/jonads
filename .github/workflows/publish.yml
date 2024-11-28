@@ -1,28 +1,69 @@
 name: Publish to NPM and JSR
 on:
-    push:
-        branches:
-          - main
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
 
 jobs:
-    publish:
-        runs-on: ubuntu-latest
+  verify:
+    runs-on: ubuntu-latest
 
-        permissions:
-            contents: read
-            id-token: write
+    steps:
+      - uses: actions/checkout@v4
 
-        steps:
-            - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Install dependencies
-              run: npm install
+      - name: Build
+        run: npm run build
 
-            - name: Build
-              run: npm run build
+      - name: Test
+        run: npm test
 
-            - name: Publish to NPM
-              run: npm publish
+  publish-npm:
+    needs: [verify]
 
-            - name: Publish to JSR
-              run: npx jsr publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-jsr:
+    needs: [verify]
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish to JSR
+        run: npx jsr publish
