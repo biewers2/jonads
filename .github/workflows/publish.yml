@@ -1,0 +1,28 @@
+name: Publish to NPM and JSR
+on:
+    push:
+        branches:
+          - main
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+            id-token: write
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build
+              run: npm run build
+
+            - name: Publish to NPM
+              run: npm publish
+
+            - name: Publish to JSR
+              run: npx jsr publish
