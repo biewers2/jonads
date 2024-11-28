@@ -1,3 +1,4 @@
+import { AsyncConsumer, AsyncMapper, Consumer, Mapper } from "../types";
 import { Left } from "./left";
 import { Right } from "./right";
 
@@ -19,7 +20,7 @@ export interface Either<L, R> {
      * value.isLeft(); // => true
      * ```
      */
-    isLeft: () => boolean;
+    isLeft(): boolean;
 
     /**
      * Checks if the value is a Right.
@@ -32,7 +33,7 @@ export interface Either<L, R> {
      * value.isRight(); // => true
      * ```
      */
-    isRight: () => boolean;
+    isRight(): boolean;
 
     /**
      * Returns the value if it is a Left, otherwise returns a default value.
@@ -52,7 +53,7 @@ export interface Either<L, R> {
      * value.leftOr(0); // => 0
      * ```
      */
-    leftOr: (fallback: L | ((right: R) => L)) => L;
+    leftOr(fallback: L | Mapper<R, L>): L;
 
     /**
      * Returns the value if it is a Left, otherwise returns a default value asynchronously.
@@ -72,7 +73,7 @@ export interface Either<L, R> {
      * await value.leftOrAsync(async () => Promise.resolve(0)); // => 0
      * ```
      */
-    leftOrAsync: (fallback: L | ((right: R) => Promise<L>)) => Promise<L>;
+    leftOrAsync(fallback: L | Promise<L> | AsyncMapper<R, L>): Promise<L>;
 
     /**
      * Returns the value if it is a Right, otherwise returns a default value.
@@ -92,7 +93,7 @@ export interface Either<L, R> {
      * value.rightOr(0); // => 0
      * ```
      */
-    rightOr: (fallback: R | ((left: L) => R)) => R;
+    rightOr(fallback: R | Mapper<L, R>): R;
 
     /**
      * Returns the value if it is a Right, otherwise returns a default value asynchronously.
@@ -112,7 +113,7 @@ export interface Either<L, R> {
      * await value.rightOrAsync(async () => Promise.resolve(0)); // => 0
      * ```
      */
-    rightOrAsync: (fallback: R | ((left: L) => Promise<R>)) => Promise<R>;
+    rightOrAsync(fallback: R | Promise<R> | AsyncMapper<L, R>): Promise<R>;
 
     /**
      * Maps the value if it is a Left, otherwise returns the value as-is.
@@ -132,7 +133,7 @@ export interface Either<L, R> {
      * value.mapLeft((value) => value + 1); // => Right(1)
      * ```
      */
-    mapLeft: <V>(mapper: (value: L) => V) => Either<V, R>;
+    mapLeft<V>(mapper: Mapper<L, V>): Either<V, R>;
 
     /**
      * Maps the value if it is a Left asynchronously, otherwise returns the value as-is.
@@ -152,7 +153,7 @@ export interface Either<L, R> {
      * await value.mapLeftAsync(async (value) => Promise.resolve(value + 1)); // => Right(1)
      * ```
      */
-    mapLeftAsync: <V>(mapper: (value: L) => Promise<V>) => Promise<Either<V, R>>;
+    mapLeftAsync<V>(mapper: AsyncMapper<L, V>): Promise<Either<V, R>>;
 
     /**
      * Maps the value if it is a Right, otherwise returns the value as-is.
@@ -172,7 +173,7 @@ export interface Either<L, R> {
      * value.mapRight((value) => value + 1); // => Left(1)
      * ```
      */
-    mapRight: <V>(mapper: (value: R) => V) => Either<L, V>;
+    mapRight<V>(mapper: Mapper<R, V>): Either<L, V>;
 
     /**
      * Maps the value if it is a Right asynchronously, otherwise returns the value as-is.
@@ -192,7 +193,7 @@ export interface Either<L, R> {
      * await value.mapRightAsync(async (value) => Promise.resolve(value + 1)); // => Left(1)
      * ```
      */
-    mapRightAsync: <V>(mapper: (value: R) => Promise<V>) => Promise<Either<L, V>>;
+    mapRightAsync<V>(mapper: AsyncMapper<R, V>): Promise<Either<L, V>>;
 
     /**
      * Applies a function to the value if it is a Left, returning itself.
@@ -212,7 +213,7 @@ export interface Either<L, R> {
      * value.tapLeft((value) => value.push(3)); // => Right([1, 2])
      * ```
      */
-    tapLeft: (callback: (value: L) => void) => Either<L, R>;
+    tapLeft(callback: Consumer<L>): Either<L, R>;
 
     /**
      * Asynchronously applies a function to the value if it is a Left, returning itself.
@@ -232,7 +233,7 @@ export interface Either<L, R> {
      * await value.tapLeftAsync(async (value) => value.push(3)); // => Right([1, 2])
      * ```
      */
-    tapLeftAsync: (callback: (value: L) => Promise<void>) => Promise<Either<L, R>>;
+    tapLeftAsync(callback: AsyncConsumer<L>): Promise<Either<L, R>>;
 
     /**
      * Applies a function to the value if it is a Right, returning itself.
@@ -252,7 +253,7 @@ export interface Either<L, R> {
      * value.tapRight((value) => value.push(3)); // => Left([1, 2])
      * ```
      */
-    tapRight: (callback: (value: R) => void) => Either<L, R>;
+    tapRight(callback: Consumer<R>): Either<L, R>;
 
     /**
      * Asynchronously applies a function to the value if it is a Right, returning itself.
@@ -272,7 +273,7 @@ export interface Either<L, R> {
      * await value.tapRightAsync(async (value) => value.push(3)); // => Left([1, 2])
      * ```
      */
-    tapRightAsync: (callback: (value: R) => Promise<void>) => Promise<Either<L, R>>;
+    tapRightAsync(callback: AsyncConsumer<R>): Promise<Either<L, R>>;
 
     /**
      * Matches the jonad by calling the appropriate callback based on the value type.
@@ -299,7 +300,7 @@ export interface Either<L, R> {
      * ); // => "Hello, world!"
      * ```
      */
-    match: <V>(onLeft: (value: L) => V, onRight: (value: R) => V) => V;
+    match<V>(onLeft: Mapper<L, V>, onRight: Mapper<R, V>): V;
 
     /**
      * Matches the jonad by calling the appropriate callback based on the value type asynchronously.
@@ -326,7 +327,7 @@ export interface Either<L, R> {
      * ); // => "1 + 2 = 3"
      * ```
      */
-    matchAsync: <V>(onLeft: (value: L) => Promise<V>, onRight: (value: R) => Promise<V>) => Promise<V>;
+    matchAsync<V>(onLeft: AsyncMapper<L, V>, onRight: AsyncMapper<R, V>): Promise<V>;
 
     /**
      * Returns the value if it is a Left, otherwise throws an error.
@@ -336,7 +337,7 @@ export interface Either<L, R> {
      * @returns The value if it is a Left.
      * @throws GetValueError if the value is a Right.
      */
-    getLeftOrThrow: () => L;
+    getLeftOrThrow(): L;
 
     /**
      * Returns the value if it is a Right, otherwise throws an error.
@@ -346,7 +347,7 @@ export interface Either<L, R> {
      * @returns The value if it is a Right.
      * @throws GetValueError if the value is a Left.
      */
-    getRightOrThrow: () => R;
+    getRightOrThrow(): R;
 }
 
 /**
@@ -365,7 +366,9 @@ export const Either = {
      * value.isLeft(); // => true
      * ```
      */
-    left: <L, R>(value: L): Either<L, R> => new Left(value),
+    left<L, R>(value: L): Either<L, R> {
+        return new Left(value);
+    },
 
     /**
      * Creates a new Right instance.
@@ -379,7 +382,9 @@ export const Either = {
      * value.isRight(); // => true
      * ```
      */
-    right: <L, R>(value: R): Either<L, R> => new Right(value),
+    right<L, R>(value: R): Either<L, R> {
+        return new Right(value);
+    },
 
     /**
      * Checks if the provided value is an instance of the Either jonad.
@@ -405,7 +410,7 @@ export const Either = {
      * Either.isInstance(value); // => false
      * ```
      */
-    isInstance: <L, R>(value: unknown): value is Either<L, R> => {
+    isInstance<L, R>(value: unknown): value is Either<L, R> {
         return value instanceof Left || value instanceof Right;
     },
 };

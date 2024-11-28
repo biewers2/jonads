@@ -2,6 +2,8 @@ import { Either } from "../either/either";
 import { Some } from "./some";
 import { None } from "./none";
 import { Result } from "../result/result";
+import { AsyncMapper, AsyncProducer, Mapper, Producer } from "../types";
+import { isNullish } from "../guards";
 
 /**
  * An Option jonad.
@@ -9,20 +11,20 @@ import { Result } from "../result/result";
  * Represents a value that may or may not be present. The left-side value is `Some`, while the right-side value is
  * `None` (represented by the value `null`).
  */
-export interface Option<T> extends Either<T, null> {
+export interface Option<T> extends Either<T, null | undefined> {
     /**
      * Checks if the value is Some.
      * 
      * @returns true if the value is Some, false otherwise.
      */
-    isSome: () => boolean;
+    isSome(): boolean;
 
     /**
      * Checks if the value is None.
      * 
      * @returns true if the value is None, false otherwise.
      */
-    isNone: () => boolean;
+    isNone(): boolean;
 
     /**
      * Returns the value if it is Some, otherwise returns a default value.
@@ -30,7 +32,7 @@ export interface Option<T> extends Either<T, null> {
      * @param fallback The default value (as-is or produced from a callback) to return if the value is None.
      * @returns The value if it is Some, otherwise the default value.
      */
-    valueOr: (fallback: T | (() => T)) => T;
+    valueOr(fallback: T | Producer<T>): T;
 
     /**
      * Returns the value if it is Some, otherwise returns a default value asynchronously.
@@ -38,7 +40,7 @@ export interface Option<T> extends Either<T, null> {
      * @param fallback The default value (as-is or produced from a callback) to return if the value is None.
      * @returns The value if it is an Ok, otherwise the default value.
      */
-    valueOrAsync: (fallback: T | (() => Promise<T>)) => Promise<T>;
+    valueOrAsync(fallback: T | Promise<T> | AsyncProducer<T>): Promise<T>;
 
     /**
      * Maps the value if it is Some.
@@ -46,7 +48,7 @@ export interface Option<T> extends Either<T, null> {
      * @param mapper The mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the Option as-is.
      */
-    map: <U>(mapper: (value: T) => U) => Option<U>;
+    map<U>(mapper: Mapper<T, U>): Option<U>;
 
     /**
      * Maps the value if it is Some, but asynchronously.
@@ -54,7 +56,7 @@ export interface Option<T> extends Either<T, null> {
      * @param mapper The async mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the Option as-is.
      */
-    mapAsync: <U>(mapper: (value: T) => Promise<U>) => Promise<Option<U>>;
+    mapAsync<U>(mapper: AsyncMapper<T, U>): Promise<Option<U>>;
 
     /**
      * Chains a new Option to the current one if it is Some.
@@ -62,7 +64,7 @@ export interface Option<T> extends Either<T, null> {
      * @param mapper The mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the value as-is.
      */
-    andThen: <U>(mapper: (value: T) => Option<U>) => Option<U>;
+    andThen<U>(mapper: Mapper<T, Option<U>>): Option<U>;
 
     /**
      * Chains a new Option to the current one if it is Some, but asynchronously.
@@ -70,7 +72,7 @@ export interface Option<T> extends Either<T, null> {
      * @param mapper The async mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the value as-is.
      */
-    andThenAsync: <U>(mapper: (value: T) => Promise<Option<U>>) => Promise<Option<U>>;
+    andThenAsync<U>(mapper: AsyncMapper<T, Option<U>>): Promise<Option<U>>;
 
     /**
      * Maps the Option to a Result.
@@ -80,7 +82,7 @@ export interface Option<T> extends Either<T, null> {
      * @param error The error to return if the Option is None.
      * @returns A Result of the Option.
      */
-    okOr(error: Error | (() => Error)): Result<T, Error>;
+    okOr<E extends Error>(error: E | Producer<E>): Result<T, E>;
 
     /**
      * Maps the Option to a Result, but asynchronously.
@@ -90,7 +92,7 @@ export interface Option<T> extends Either<T, null> {
      * @param error The error to return if the Option is None.
      * @returns A Result of the Option.
      */
-    okOrAsync(error: Error | Promise<Error> | (() => Promise<Error>)): Promise<Result<T, Error>>;
+    okOrAsync<E extends Error>(error: E | Promise<E> | AsyncProducer<E>): Promise<Result<T, E>>;
 }
 
 /**
@@ -103,9 +105,9 @@ export const Option = {
      * @param value The value to wrap in an Option.
      * @returns A new Option with the left-value `Some` if the value is not `null` or `undefined`, otherwise `None`.
      */
-    from: <T>(value: T | null | undefined): Option<T> => {
-        if (value === null || value === undefined) {
-            return new None();
+    from<T>(value: T | null | undefined): Option<T> {
+        if (isNullish(value)) {
+            return new None(value);
         } else {
             return new Some(value);
         }
@@ -116,7 +118,7 @@ export const Option = {
      * 
      * @returns A new Option with the right-value `None`.
      */
-    none: <T>(): Option<T> => {
+    none<T>(): Option<T> {
         return new None();
     },
 
@@ -139,7 +141,7 @@ export const Option = {
      * const result_option = Option.transpose(option_result);           // Err(ParseIntError)
      * ```
      */
-    transpose: <T, E extends Error>(option: Option<Result<T, E>>): Result<Option<T>, E> => {
+    transpose<T, E extends Error>(option: Option<Result<T, E>>): Result<Option<T>, E> {
         return option.match<Result<Option<T>, E>>(
             some_result => some_result.map(value => new Some(value)),
             () => Result.ok(Option.none())
@@ -152,7 +154,7 @@ export const Option = {
      * @param value The value to check.
      * @returns true if the value is an Option, false otherwise
      */
-    isInstance: <T>(value: unknown): value is Option<T> => {
+    isInstance<T>(value: unknown): value is Option<T> {
         return value instanceof Some || value instanceof None;
-    }
+    },
 }

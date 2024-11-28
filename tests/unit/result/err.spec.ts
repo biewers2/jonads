@@ -33,6 +33,11 @@ describe("Result", () => {
             expect(await result.valueOrAsync("b")).toBe("b");
         });
 
+        it("returns the promised fallback value", async () => {
+            const result = Result.err(new Error());
+            expect(await result.valueOrAsync(Promise.resolve("b"))).toBe("b");
+        });
+
         it("returns the result of the fallback function", async () => {
             const result = Result.err<string, Error>(new Error("5"));
             expect(await result.valueOrAsync(async e => e.message)).toBe("5");

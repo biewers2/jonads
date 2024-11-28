@@ -14,8 +14,8 @@
     "typescript",
     "fp"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Jake Biewer",
+  "license": "MIT",
   "description": "J(avascript M)onads - A library for writing clean, programmatically correct code.",
   "dependencies": {
     "typescript": "^5"

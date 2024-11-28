@@ -8,9 +8,6 @@ A set of monadic classes ("Jonads") and utilities for writing clean, programmati
 
 ## List of Jonads
 
-Jonads are Javascript classes that implement Typescript interfaces to create monadic structures for
-creating safe, idiomatic code.
-
 ### Either
 
 Either left or right. This Jonad represents one of two possible values. It is the base type of other Jonads, such as

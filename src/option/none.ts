@@ -1,11 +1,11 @@
 import { Option } from "./option";
 import { Right } from "../either/right";
 import { isFunction } from "../guards";
-import { Result } from "../jonads";
+import { AsyncMapper, AsyncProducer, Mapper, Producer, Result } from "../jonads";
 
 export class None<T> extends Right<T, null> implements Option<T> {
-    constructor() {
-        super(null);
+    constructor(nullish: null | undefined = null) {
+        super(nullish);
     }
 
     isSome(): boolean {
@@ -16,7 +16,7 @@ export class None<T> extends Right<T, null> implements Option<T> {
         return true;
     }
 
-    valueOr(fallback: T | (() => T)): T {
+    valueOr(fallback: T | Producer<T>): T {
         if (isFunction(fallback)) {
             return fallback();
         } else {
@@ -24,31 +24,31 @@ export class None<T> extends Right<T, null> implements Option<T> {
         }
     }
 
-    async valueOrAsync(fallback: T | (() => Promise<T>)): Promise<T> {
+    async valueOrAsync(fallback: T | Promise<T> | AsyncProducer<T>): Promise<T> {
         if (isFunction(fallback)) {
             return await fallback();
         } else {
-            return fallback;
+            return await Promise.resolve(fallback);
         }
     }
 
-    map<U>(mapper: (value: T) => U): Option<U> {
+    map<U>(mapper: Mapper<T, U>): Option<U> {
         return new None();
     }
 
-    async mapAsync<U>(mapper: (value: T) => Promise<U>): Promise<Option<U>> {
+    async mapAsync<U>(mapper: AsyncMapper<T, U>): Promise<Option<U>> {
         return new None();
     }
 
-    andThen<U>(mapper: (value: T) => Option<U>): Option<U> {
+    andThen<U>(mapper: Mapper<T, Option<U>>): Option<U> {
         return new None();
     }
 
-    async andThenAsync<U>(mapper: (value: T) => Promise<Option<U>>): Promise<Option<U>> {
+    async andThenAsync<U>(mapper: AsyncMapper<T, Option<U>>): Promise<Option<U>> {
         return new None();
     }
 
-    okOr(error: Error | (() => Error)): Result<T, Error> {
+    okOr<E extends Error>(error: E | Producer<E>): Result<T, E> {
         if (isFunction(error)) {
             return Result.err(error());
         } else {
@@ -56,7 +56,7 @@ export class None<T> extends Right<T, null> implements Option<T> {
         }
     }
 
-    async okOrAsync(error: Error | Promise<Error> | (() => Promise<Error>)): Promise<Result<T, Error>> {
+    async okOrAsync<E extends Error>(error: E | Promise<E> | AsyncProducer<E>): Promise<Result<T, E>> {
         if (isFunction(error)) {
             return Result.err(await error());
         } else {

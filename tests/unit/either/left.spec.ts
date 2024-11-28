@@ -48,6 +48,11 @@ describe("Left", () => {
             expect(await l.rightOrAsync("a")).toBe("a");
         });
 
+        it("returns the promised fallback value", async () => {
+            const l = Either.left(1);
+            expect(await l.rightOrAsync(Promise.resolve("a"))).toBe("a");
+        });
+
         it("returns the result of the fallback function", async () => {
             const l = Either.left<number, string>(1);
             expect(await l.rightOrAsync(async n => n + "")).toBe("1");

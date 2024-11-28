@@ -1,10 +1,6 @@
 import { isFunction } from "./guards";
 import { Result } from "./result/result";
-
-/**
- * A type representing a class that extends `Error`.
- */
-export type ErrorClass = { new(...args: any[]): Error };
+import { ErrorClass } from "./types";
 
 /**
  * Execute a block of code, catching any errors and returning them as `Err`.

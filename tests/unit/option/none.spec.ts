@@ -33,6 +33,11 @@ describe("None", () => {
             expect(await option.valueOrAsync(0)).toBe(0);
         });
 
+        it("returns the fallback from a Promise", async () => {
+            const option = Option.none();
+            expect(await option.valueOrAsync(Promise.resolve(0))).toBe(0);
+        });
+
         it("returns the result of the fallback function", async () => {
             const option = Option.none();
             expect(await option.valueOrAsync(async () => 0)).toBe(0);
