@@ -4,7 +4,7 @@ import { isFunction } from "../guards";
 import { AsyncMapper, AsyncProducer, Mapper, Producer, Result } from "../jonads";
 
 export class None<T> extends Right<T, null> implements Option<T> {
-    constructor(nullish: null | undefined = null) {
+    constructor(nullish: null | undefined) {
         super(nullish);
     }
 
@@ -33,19 +33,19 @@ export class None<T> extends Right<T, null> implements Option<T> {
     }
 
     map<U>(mapper: Mapper<T, U>): Option<U> {
-        return new None();
+        return new None(this.value);
     }
 
     async mapAsync<U>(mapper: AsyncMapper<T, U>): Promise<Option<U>> {
-        return new None();
+        return new None(this.value);
     }
 
     andThen<U>(mapper: Mapper<T, Option<U>>): Option<U> {
-        return new None();
+        return new None(this.value);
     }
 
     async andThenAsync<U>(mapper: AsyncMapper<T, Option<U>>): Promise<Option<U>> {
-        return new None();
+        return new None(this.value);
     }
 
     okOr<E extends Error>(error: E | Producer<E>): Result<T, E> {

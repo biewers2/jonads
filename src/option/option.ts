@@ -119,7 +119,7 @@ export const Option = {
      * @returns A new Option with the right-value `None`.
      */
     none: <T>(): Option<T> => {
-        return new None();
+        return new None(null);
     },
 
     /**
