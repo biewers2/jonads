@@ -9,45 +9,36 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm run build
       - run: npm test
 
-  publish-npm:
+  publish-jsr:
     needs: [verify]
-
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npx jsr publish
 
+  publish-npm:
+    needs: [verify]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
           registry-url: 'https://registry.npmjs.org'
-      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-      - run: cat ~/.npmrc
       - run: npm ci
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-jsr:
-    needs: [verify]
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm ci
-      - run: npx jsr publish

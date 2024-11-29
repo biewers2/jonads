@@ -16,6 +16,10 @@
     "maybe",
     "either"
   ],
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/biewers2/jonads"
+  },
   "main": "dist/jonads.js",
   "types": "dist/jonads.d.ts",
   "scripts": {
