@@ -85,8 +85,8 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @example
      * ```typescript
-     * const option = Option.from(123);
-     * option.map(n => n.toString()); // Some("123")
+     * const something = Option.from(123);
+     * something.map(n => n.toString()); // Some("123")
      * ```
      */
     map<U>(mapper: Mapper<T, U>): Option<U>;
@@ -99,8 +99,8 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @example
      * ```typescript
-     * const option = Option.from("https://example.com");
-     * option.mapAsync(async url => await fetch(url)); // Promise(Some(Response))
+     * const something = Option.from("https://example.com");
+     * something.mapAsync(async url => await fetch(url)); // Promise(Some(Response))
      * ```
      */
     mapAsync<U>(mapper: AsyncMapper<T, U>): Promise<Option<U>>;
@@ -169,8 +169,8 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @example
      * ```typescript
-     * const option = Option.from(123);
-     * option.okOrAsync(async () => {
+     * const something = Option.from(123);
+     * something.okOrAsync(async () => {
      *   await error_reporter.send("error", "Value is None");
      *   return new Error("Value is None");
      * }); // Promise(Ok(123))
@@ -202,8 +202,8 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @example
      * ```typescript
-     * const option = Option.from(123);
-     * option.okOrErrorAsync(async () => {
+     * const something = Option.from(123);
+     * something.okOrErrorAsync(async () => {
      *   await error_reporter.send("error", "Value is None");
      *   return "Value is None";
      * }); // Promise(Ok(123))
@@ -244,7 +244,7 @@ export const Option = {
      * 
      * @example
      * ```typescript
-     * const option = Option.none(); // None
+     * const nothing = Option.none(); // None
      * ```
      */
     none: <T>(): Option<T> => {
@@ -292,7 +292,7 @@ export const Option = {
      * ```typescript
      * if (Option.isInstance<number>(value)) {
      *   // value is now Option<number>
-     *   return option.valueOr(0); 
+     *   return value.valueOr(0); 
      * }
      */
     isInstance: <T>(value: unknown): value is Option<T> => {

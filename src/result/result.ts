@@ -18,13 +18,10 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @example
      * ```typescript
-     * const result = Result.ok(123);
+     * const okish = Result.ok(123);
      * result.isOk(); // true
-     * ```
      * 
-     * @example
-     * ```typescript
-     * const result = Result.err(new Error("An error"));
+     * const errish = Resulr.error("An error");
      * result.isOk(); // false
      * ```
      */
@@ -37,8 +34,11 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @example
      * ```typescript
-     * const result = Result.ok(123);
-     * result.isErr(); // false
+     * const okish = Result.ok(123);
+     * okish.isErr(); // false
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.isErr(); // true
      * ```
      */
     isErr(): boolean;
@@ -48,6 +48,14 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param fallback The default value (as-is or produced from a callback) to return if the value is an Err.
      * @returns The value if it is an Ok, otherwise the default value.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.valueOr(0); // 123
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.valueOr(0); // 0
      */
     valueOr(fallback: V | Mapper<E, V>): V;
 
@@ -56,6 +64,15 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param fallback The default value (as-is or produced from a callback) to return if the value is an Err.
      * @returns The value if it is an Ok, otherwise the default value.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.valueOrAsync(async () => 0); // Promise(123)
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.valueOrAsync(Promise.resolve(0)); // Promise(0)
+     * ```
      */
     valueOrAsync(fallback: V | Promise<V> | AsyncMapper<E, V>): Promise<V>;
 
@@ -64,6 +81,15 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param mapper The mapper function to apply to the value if it is an Ok.
      * @returns A new Result with the mapped value if it is an Ok, otherwise the result as-is.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.map(value => value * 2); // Ok(246)
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.map(value => value * 2); // Err("An error")
+     * ```
      */
     map<T>(mapper: Mapper<V, T>): Result<T, E>;
 
@@ -72,6 +98,14 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param mapper The async mapper function to apply to the value if it is an Ok.
      * @returns A new Result with the mapped value if it is an Ok, otherwise the result as-is.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.mapAsync(async value => value * 2); // Promise(246)
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.mapAsync(async value => value * 2); // Promise("An error")
      */
     mapAsync<T>(mapper: AsyncMapper<V, T>): Promise<Result<T, E>>;
 
@@ -80,6 +114,14 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param mapper The mapper function to apply to the error if it is an Err.
      * @returns A new Result with the mapped error if it is an Err, otherwise the result as-is.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.mapErr(error => new Error("An error")); // Ok(123)
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.mapErr(error => new Error("Another error")); // Err("Another error")
      */
     mapErr<T extends Error>(mapper: Mapper<E, T>): Result<V, T>;
 
@@ -88,6 +130,15 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * 
      * @param mapper The async mapper function to apply to the error if it is an Err.
      * @returns A new Result with the mapped error if it is an Err, otherwise the result as-is.
+     * 
+     * @example
+     * ```typescript
+     * const okish = Result.ok(123);
+     * okish.mapErrAsync(async error => new Error("An error")); // Ok(123)
+     * 
+     * const errish = Resulr.error("An error");
+     * errish.mapErrAsync(async error => new Error("Another error")); // Promise(Err("Another error"))
+     * ```
      */
     mapErrAsync<T extends Error>(mapper: AsyncMapper<E, T>): Promise<Result<V, T>>;
 
