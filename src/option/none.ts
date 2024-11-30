@@ -65,6 +65,23 @@ export class None<T> extends Right<T, null> implements Option<T> {
         }
     }
 
+    okOrError(message: string | Producer<string>): Result<T, Error> {
+        if (isFunction(message)) {
+            return Result.err(new Error(message()));
+        } else {
+            return Result.err(new Error(message));
+        }
+    }
+
+    async okOrErrorAsync(message: string | Promise<string> | AsyncProducer<string>): Promise<Result<T, Error>> {
+        if (isFunction(message)) {
+            return Result.error(await message());
+        } else {
+            const resolvedMessage = await Promise.resolve(message);
+            return Result.error(resolvedMessage);
+        }
+    }
+
     toString(): string {
         return `None`;
     }

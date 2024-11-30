@@ -19,6 +19,16 @@ describe("Result", () => {
         });
     });
 
+    describe("error()", () => {
+        it("creates an Err instance with an Error", () => {
+            const result = Result.error("oops");
+            expect(result.isErr()).toBe(true);
+            const error = result.getRightOrThrow();
+            expect(error).toBeInstanceOf(Error);
+            expect(error.message).toBe("oops");
+        });
+    });
+
     describe("transpose()", () => {
         it("transposes an Ok of a Some into a Some of an Ok", () => {
             const result = Result.ok(Option.from(1));

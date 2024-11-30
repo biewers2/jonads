@@ -15,6 +15,18 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * Checks if the value is an Ok.
      * 
      * @returns true if the value is an Ok, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const result = Result.ok(123);
+     * result.isOk(); // true
+     * ```
+     * 
+     * @example
+     * ```typescript
+     * const result = Result.err(new Error("An error"));
+     * result.isOk(); // false
+     * ```
      */
     isOk(): boolean;
 
@@ -22,6 +34,12 @@ export interface Result<V, E extends Error> extends Either<V, E> {
      * Checks if the value is an Err.
      * 
      * @returns true if the value is an Err, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const result = Result.ok(123);
+     * result.isErr(); // false
+     * ```
      */
     isErr(): boolean;
 
@@ -133,6 +151,16 @@ export const Result = {
      */
     err: <V, E extends Error>(value: E): Result<V, E> => {
         return new Err(value);
+    },
+
+    /**
+     * Creates a new `Error` with the provided message and wraps it in an `Err`.
+     * 
+     * @param message The error message.
+     * @returns A new `Err` instance with the error.
+     */
+    error: <V>(message: string): Result<V, Error> => {
+        return new Err(new Error(message));
     },
 
     /**

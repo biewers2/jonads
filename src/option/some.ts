@@ -45,7 +45,15 @@ export class Some<T> extends Left<T, null> implements Option<T> {
 
     async okOrAsync<E extends Error>(error: E | Promise<E> | AsyncProducer<E>): Promise<Result<T, E>> {
         return Result.ok(this.value);
-    }   
+    }
+
+    okOrError(message: string | Producer<string>): Result<T, Error> {
+        return Result.ok(this.value);
+    }
+
+    async okOrErrorAsync(message: string | Promise<string> | AsyncProducer<string>): Promise<Result<T, Error>> {
+        return Result.ok(this.value);
+    }
 
     toString(): string {
         return `Some(${this.value})`;
