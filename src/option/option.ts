@@ -16,6 +16,14 @@ export interface Option<T> extends Either<T, null | undefined> {
      * Checks if the value is Some.
      * 
      * @returns true if the value is Some, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.isSome(); // true
+     * 
+     * const nothing = Option.from(null);
+     * nothing.isSome(); // false
      */
     isSome(): boolean;
 
@@ -23,6 +31,15 @@ export interface Option<T> extends Either<T, null | undefined> {
      * Checks if the value is None.
      * 
      * @returns true if the value is None, false otherwise.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.isNone(); // false
+     * 
+     * const nothing = Option.from(null);
+     * nothing.isNone(); // true
+     * ```
      */
     isNone(): boolean;
 
@@ -31,6 +48,15 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param fallback The default value (as-is or produced from a callback) to return if the value is None.
      * @returns The value if it is Some, otherwise the default value.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.valueOr(0); // 123
+     * 
+     * const nothing = Option.none();
+     * nothing.valueOr(0); // 0
+     * ```
      */
     valueOr(fallback: T | Producer<T>): T;
 
@@ -39,6 +65,15 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param fallback The default value (as-is or produced from a callback) to return if the value is None.
      * @returns The value if it is an Ok, otherwise the default value.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.valueOrAsync(async () => 0); // 123
+     * 
+     * const nothing = Option.none();
+     * nothing.valueOrAsync(async () => 0); // 0
+     * ```
      */
     valueOrAsync(fallback: T | Promise<T> | AsyncProducer<T>): Promise<T>;
 
@@ -47,6 +82,12 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param mapper The mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the Option as-is.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.map(n => n.toString()); // Some("123")
+     * ```
      */
     map<U>(mapper: Mapper<T, U>): Option<U>;
 
@@ -55,6 +96,12 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param mapper The async mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the Option as-is.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from("https://example.com");
+     * something.mapAsync(async url => await fetch(url)); // Promise(Some(Response))
+     * ```
      */
     mapAsync<U>(mapper: AsyncMapper<T, U>): Promise<Option<U>>;
 
@@ -63,6 +110,13 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param mapper The mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the value as-is.
+     * 
+     * @example
+     * ```typescript
+     * const object = Option.from({name: "Alice"});
+     * const name = object.andThen(o => Option.from(o.name)); // Some("Alice")
+     * const age = object.andThen(o => Option.from(o.age));   // None
+     * ```
      */
     andThen<U>(mapper: Mapper<T, Option<U>>): Option<U>;
 
@@ -71,6 +125,17 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param mapper The async mapper function to apply to the value if it is Some.
      * @returns A new Option with the mapped value if it is Some, otherwise the value as-is.
+     * 
+     * @example
+     * ```typescript
+     * // const userId: Option<number>;
+     * const url = userId.map(n => `https://api.example.com/users/${n}`);
+     * const name = await url.andThenAsync(async url => {
+     *   const res = await fetch(url));
+     *   const userObj = await res.json();
+     *   return Option.from(userObj.name);
+     * }); // Some("Alice")
+     * ```
      */
     andThenAsync<U>(mapper: AsyncMapper<T, Option<U>>): Promise<Option<U>>;
 
@@ -81,18 +146,70 @@ export interface Option<T> extends Either<T, null | undefined> {
      * 
      * @param error The error to return if the Option is None.
      * @returns A Result of the Option.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.okOr(new Error("Value is None")); // Ok(123)
+     * 
+     * const nothing = Option.none();
+     * nothing.okOr(new Error("Value is None")); // Err(Error("Value is None"))
+     * ```
      */
     okOr<E extends Error>(error: E | Producer<E>): Result<T, E>;
 
     /**
-     * Maps the Option to a Result, but asynchronously.
+     * Maps the Option to a promised Result.
      * 
-     * If the Option is Some, the value will be wrapped in an Ok. If the Option is None, the provided error will be returned.
+     * If the Option is Some, the value will be wrapped in an Ok. If the Option is None, the provided error will be
+     * returned.
      * 
      * @param error The error to return if the Option is None.
      * @returns A Result of the Option.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.okOrAsync(async () => {
+     *   await error_reporter.send("error", "Value is None");
+     *   return new Error("Value is None");
+     * }); // Promise(Ok(123))
      */
     okOrAsync<E extends Error>(error: E | Promise<E> | AsyncProducer<E>): Promise<Result<T, E>>;
+
+    /**
+     * Maps the Option to a Result, creating a new error from the message if the Option is None.
+     * 
+     * @param message The message to create the error from if the Option is None.
+     * @returns A Result of the Option.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.okOrError("Value is None"); // Ok(123)
+     * 
+     * const nothing = Option.none();
+     * nothing.okOrError("Value is None"); // Err(Error("Value is None"))
+     * ```
+     */
+    okOrError(message: string | Producer<string>): Result<T, Error>;
+
+    /**
+     * Maps the Option to a promised Result, creating a new error from the message if the Option is None.
+     * 
+     * @param message The message to create the error from if the Option is None.
+     * @returns A Result of the Option.
+     * 
+     * @example
+     * ```typescript
+     * const something = Option.from(123);
+     * something.okOrErrorAsync(async () => {
+     *   await error_reporter.send("error", "Value is None");
+     *   return "Value is None";
+     * }); // Promise(Ok(123))
+     * ```
+     */
+    okOrErrorAsync(message: string | Promise<string> | AsyncProducer<string>): Promise<Result<T, Error>>;
 }
 
 /**
@@ -104,6 +221,13 @@ export const Option = {
      * 
      * @param value The value to wrap in an Option.
      * @returns A new Option with the left-value `Some` if the value is not `null` or `undefined`, otherwise `None`.
+     * 
+     * @example
+     * ```typescript
+     * const somthing = Option.from(123);               // Some(123)
+     * const nothingNull = Option.from(null);           // None
+     * const nothingUndefined = Option.from(undefined); // None
+     * ```
      */
     from: <T>(value: T | null | undefined): Option<T> => {
         if (isNullish(value)) {
@@ -117,9 +241,14 @@ export const Option = {
      * Creates a new Option with the right-value `None`. 
      * 
      * @returns A new Option with the right-value `None`.
+     * 
+     * @example
+     * ```typescript
+     * const nothing = Option.none(); // None
+     * ```
      */
     none: <T>(): Option<T> => {
-        return new None();
+        return new None(null);
     },
 
     /**
@@ -153,6 +282,18 @@ export const Option = {
      * 
      * @param value The value to check.
      * @returns true if the value is an Option, false otherwise
+     * 
+     * @example Useful for checking in Javascript.
+     * ```javascript
+     * Option.isInstance(Option.from(123)); // true
+     * ```
+     * 
+     * @example More useful for type guarding in Typescript.
+     * ```typescript
+     * if (Option.isInstance<number>(value)) {
+     *   // value is now Option<number>
+     *   return value.valueOr(0); 
+     * }
      */
     isInstance: <T>(value: unknown): value is Option<T> => {
         return value instanceof Some || value instanceof None;
