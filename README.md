@@ -97,6 +97,19 @@ console.log(body.valueOr({}));
 // => {}
 ```
 
+Jonads' methods are also paired with a higher order function for working in more complex situations, such as a list
+of results.
+
+```typescript
+const results: Result<number, Error>[] = [Result.ok(1), Result.ok(2), Result.error("something happened!")];
+const newResults = results
+    .filter(Result.isOk())
+    .map(Result.map(result => result * 2))
+
+console.log(newResults)
+// => [Ok(2), Ok(4)]
+```
+
 ### Option
 
 Option represents a value that may or may not exist. This is a subtype of `Either`, and also has two implicit concrete

@@ -70,6 +70,69 @@ describe("Option", () => {
             expect(Option.isInstance(option)).toBe(false);
         });
     });
+
+    describe("isSome()", () => {
+        it("calls the isSome method of the provided option", () => {
+            const mapper = Option.isSome();
+
+            expect(mapper(Option.from(1))).toBe(true);
+            expect(mapper(Option.none())).toBe(false);
+        });
+    });
+
+    describe("isNone()", () => {
+        it("calls the isNone method of the provided option", () => {
+            const mapper = Option.isNone();
+
+            expect(mapper(Option.from(1))).toBe(false);
+            expect(mapper(Option.none())).toBe(true);
+        });
+    });
+
+    describe("valueOr()", () => {
+        it("calls the valueOr method of the provided option", () => {
+            const mapper = Option.valueOr(2);
+
+            expect(mapper(Option.from(1))).toBe(1);
+            expect(mapper(Option.none())).toBe(2);
+        });
+    });
+
+    describe("map()", () => {
+        it("calls the map method of the provided option", () => {
+            const mapper = Option.map((value: number) => value + 1);
+
+            expect(mapper(Option.from(1)).getLeftOrThrow()).toBe(2);
+            expect(mapper(Option.none()).isNone()).toBe(true);
+        });
+    });
+
+    describe("andThen()", () => {
+        it("calls the andThen method of the provided option", () => {
+            const mapper = Option.andThen((value: number) => Option.from(value + 1));
+
+            expect(mapper(Option.from(1)).getLeftOrThrow()).toBe(2);
+            expect(mapper(Option.none()).isNone()).toBe(true);
+        });
+    });
+
+    describe("okOr()", () => {
+        it("calls the okOr method of the provided option", () => {
+            const mapper = Option.okOr(new Error("oops"));
+
+            expect(mapper(Option.from(1))).toEqual(Result.ok(1));
+            expect(mapper(Option.none())).toEqual(Result.err(new Error("oops")));
+        });
+    });
+
+    describe("okOrError()", () => {
+        it("calls the okOrError method of the provided option", () => {
+            const mapper = Option.okOrError("oops");
+
+            expect(mapper(Option.from(1))).toEqual(Result.ok(1));
+            expect(mapper(Option.none())).toEqual(Result.err(new Error("oops")));
+        });
+    });
 });
 
 

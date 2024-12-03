@@ -298,4 +298,86 @@ export const Option = {
     isInstance: <T>(value: unknown): value is Option<T> => {
         return value instanceof Some || value instanceof None;
     },
+
+    /**
+     * Higher order function returning a function that performs the `isSome` method on the provided Option.
+     * 
+     * The returned function checks if the value is Some.
+     * 
+     * @returns A function that checks if the value is Some.
+     */
+    isSome: <T>(): Mapper<Option<T>, boolean> => {
+        return option => option.isSome();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `isNone` method on the provided Option.
+     * 
+     * The returned function checks if the value is None.
+     * 
+     * @returns A function that checks if the value is None.
+     */
+    isNone: <T>(): Mapper<Option<T>, boolean> => {
+        return option => option.isNone();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `valueOr` method on the provided Option.
+     * 
+     * The returned function returns the value if it is Some, otherwise returns a default value.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is None.
+     * @returns A function that returns the value if it is Some, otherwise the default value.
+     */
+    valueOr: <T>(fallback: T | Producer<T>): Mapper<Option<T>, T> => {
+        return option => option.valueOr(fallback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `map` method on the provided Option.
+     * 
+     * The returned function maps the value if it is Some.
+     * 
+     * @param mapper The mapper function to apply to the value if it is Some.
+     * @returns A function that maps the value if it is Some.
+     */
+    map: <T, U>(mapper: Mapper<T, U>): Mapper<Option<T>, Option<U>> => {
+        return option => option.map(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `andThen` method on the provided Option.
+     * 
+     * The returned function chains a new Option to the current one if it is Some.
+     * 
+     * @param mapper The mapper function to apply to the value if it is Some.
+     * @returns A function that chains a new Option to the current one if it is Some.
+     */
+    andThen: <T, U>(mapper: Mapper<T, Option<U>>): Mapper<Option<T>, Option<U>> => {
+        return option => option.andThen(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `okOr` method on the provided Option.
+     * 
+     * The returned function maps the Option to a Result.
+     * 
+     * @param error The error to return if the Option is None.
+     * @returns A function that maps the Option to a Result.
+     */
+    okOr: <T, E extends Error>(error: E | Producer<E>): Mapper<Option<T>, Result<T, E>> => {
+        return option => option.okOr(error);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `okOrError` method on the provided Option.
+     * 
+     * The returned function maps the Option to a Result, creating a new error from the message if the Option is None.
+     * 
+     * @param message The message to create the error from if the Option is None.
+     * @returns A function that maps the Option to a Result.
+     */
+    okOrError: <T>(message: string | Producer<string>): Mapper<Option<T>, Result<T, Error>> => {
+        return option => option.okOrError(message);
+    }
 }

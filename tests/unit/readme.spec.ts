@@ -58,6 +58,15 @@ describe("README", () => {
             body = await result.mapAsync(async response => await response.json());
             expect(body.valueOr({})).toEqual({});
         });
+
+        test("working with values in a list", () => {
+            const results: Result<number, Error>[] = [Result.ok(1), Result.ok(2), Result.error("something happened!")];
+            const newResults = results
+                .filter(Result.isOk())
+                .map(Result.map(result => result * 2));
+
+            expect(newResults).toEqual([Result.ok(2), Result.ok(4)]);
+        });
     });
 
     describe("Option examples", () => {
