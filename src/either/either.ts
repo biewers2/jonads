@@ -413,4 +413,110 @@ export const Either = {
     isInstance: <L, R>(value: unknown): value is Either<L, R> => {
         return value instanceof Left || value instanceof Right;
     },
+
+    /**
+     * Higher order function returning a function that performs the `isLeft` method on the provided Either.
+     * 
+     * The returned function checks if the value is a Left.
+     * 
+     * @returns A function that checks if the provided Either is a Left.
+     */
+    isLeft: <L, R>(): Mapper<Either<L, R>, boolean> => {
+        return e => e.isLeft();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `isRight` method on the provided Either.
+     * 
+     * The returned function checks if the value is a Right.
+     * 
+     * @returns A function that checks if the provided Either is a Right.
+     */
+    isRight: <L, R>(): Mapper<Either<L, R>, boolean> => {
+        return e => e.isRight();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `leftOr` method on the provided Either.
+     * 
+     * The returned function returns the value if it is a Left, otherwise returns a default value.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is a Right.
+     * @returns A function that returns the value if it is a Left, otherwise the default value.
+     */
+    leftOr: <L, R>(fallback: L | Mapper<R, L>): Mapper<Either<L, R>, L> => {
+        return e => e.leftOr(fallback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `rightOr` method on the provided Either.
+     * 
+     * The returned function returns the value if it is a Left, otherwise returns a default value asynchronously.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is a Right.
+     * @returns A function that returns the value if it is a Left, otherwise the default value.
+     */
+    rightOr: <L, R>(fallback: R | Mapper<L, R>): Mapper<Either<L, R>, R> => {
+        return e => e.rightOr(fallback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `mapLeft` method on the provided Either.
+     * 
+     * The returned function maps the value if it is a Left, otherwise returns the value as-is.
+     * 
+     * @param mapper The function to apply to the value if it is a Left.
+     * @returns A function that maps the value if it is a Left, otherwise the value as-is.
+     */
+    mapLeft: <L, R, V>(mapper: Mapper<L, V>): Mapper<Either<L, R>, Either<V, R>> => {
+        return e => e.mapLeft(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `mapRight` method on the provided Either.
+     * 
+     * The returned function maps the value if it is a Right, otherwise returns the value as-is.
+     * 
+     * @param mapper The function to apply to the value if it is a Right.
+     * @returns A function that maps the value if it is a Right, otherwise the value as-is.
+     */
+    mapRight: <L, R, V>(mapper: Mapper<R, V>): Mapper<Either<L, R>, Either<L, V>> => {
+        return e => e.mapRight(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `tapLeft` method on the provided Either.
+     * 
+     * The returned function applies a function to the value if it is a Left, returning itself.
+     * 
+     * @param callback The function to apply to the value if it is a Left.
+     * @returns A function that applies a function to the value if it is a Left, returning itself.
+     */
+    tapLeft: <L, R>(callback: Consumer<L>): Mapper<Either<L, R>, Either<L, R>> => {
+        return e => e.tapLeft(callback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `tapRight` method on the provided Either.
+     * 
+     * The returned function applies a function to the value if it is a Right, returning itself.
+     * 
+     * @param callback The function to apply to the value if it is a Right.
+     * @returns A function that applies a function to the value if it is a Right, returning itself.
+     */
+    tapRight: <L, R>(callback: Consumer<R>): Mapper<Either<L, R>, Either<L, R>> => {
+        return e => e.tapRight(callback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `match` method on the provided Either.
+     * 
+     * The returned funct)ion matches the jonad by calling the appropriate callback based on the value type.
+     * 
+     * @param onLeft If the value is a Left, this callback is called with the value.
+     * @param onRight If the value is a Right, this callback is called with the value.
+     */
+    match: <L, R, V>(onLeft: Mapper<L, V>, onRight: Mapper<R, V>): Mapper<Either<L, R>, V> => {
+        return e => e.match(onLeft, onRight);
+    },
 };

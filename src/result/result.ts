@@ -236,4 +236,96 @@ export const Result = {
     isInstance: <V, E extends Error>(value: unknown): value is Result<V, E> => {
         return value instanceof Ok || value instanceof Err;
     },
+
+    /**
+     * Higher order function returning a function that performs the `isOk` method on the provided Result.
+     * 
+     * The returned function checks if the value is Ok.
+     * 
+     * @returns A function that checks if the value is Ok.
+     */
+    isOk: <V, E extends Error>(): Mapper<Result<V, E>, boolean> => {
+        return result => result.isOk();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `isErr` method on the provided Result.
+     * 
+     * The returned function checks if the value is Err.
+     * 
+     * @returns A function that checks if the value is Err.
+     */
+    isErr: <V, E extends Error>(): Mapper<Result<V, E>, boolean> => {
+        return result => result.isErr();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `valueOr` method on the provided Result.
+     * 
+     * The returned function returns the value if it is an Ok, otherwise a default value.
+     * 
+     * @param fallback The default value (as-is or produced from a callback) to return if the value is an Err.
+     * @returns A function that returns the value if it is an Ok, otherwise the default value.
+     */
+    valueOr: <V, E extends Error>(fallback: V | Mapper<E, V>): Mapper<Result<V, E>, V> => {
+        return result => result.valueOr(fallback);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `map` method on the provided Result.
+     * 
+     * The returned function maps the value if it is an Ok.
+     * 
+     * @param mapper The mapper function to apply to the value if it is an Ok.
+     * @returns A function that maps the value if it is an Ok.
+     */
+    map: <V, E extends Error, T>(mapper: Mapper<V, T>): Mapper<Result<V, E>, Result<T, E>> => {
+        return result => result.map(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `mapErr` method on the provided Result.
+     * 
+     * The returned function maps the error if it is an Err.
+     * 
+     * @param mapper The mapper function to apply to the error if it is an Err.
+     * @returns A function that maps the error if it is an Err.
+     */
+    mapErr: <V, E extends Error, T extends Error>(mapper: Mapper<E, T>): Mapper<Result<V, E>, Result<V, T>> => {
+        return result => result.mapErr(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `andThen` method on the provided Result.
+     * 
+     * The returned function maps the current Result to a new one if it is Ok.
+     * 
+     * @param mapper The mapper function to apply to the value if it is an Ok.
+     * @returns A function that maps the current Result to a new one if it is Ok.
+     */
+    andThen: <V, E extends Error, T>(mapper: Mapper<V, Result<T, E>>): Mapper<Result<V, E>, Result<T, E>> => {
+        return result => result.andThen(mapper);
+    },
+
+    /**
+     * Higher order function returning a function that performs the `someOrNone` method on the provided Result.
+     * 
+     * The returned function maps the Result into an Option.
+     * 
+     * @returns A function that maps the Result into an Option.
+     */
+    someOrNone: <V, E extends Error>(): Mapper<Result<V, E>, Option<V>> => {
+        return result => result.someOrNone();
+    },
+
+    /**
+     * Higher order function returning a function that performs the `asNullable` method on the provided Result.
+     * 
+     * The returned function maps the Result so the `Ok` value is wrapped in an Option based on its presence.
+     * 
+     * @returns A function that maps the Result so the `Ok` value is wrapped in an Option based on its presence.
+     */
+    asNullable: <V, E extends Error>(): Mapper<Result<V, E>, Result<Option<V>, E>> => {
+        return result => result.asNullable();
+    },
 };
